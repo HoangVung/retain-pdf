@@ -2,12 +2,13 @@
   <app-shell-header></app-shell-header>
 
   <section class="card workflow-card">
-    <div id="job-warning" class="job-warning hidden">检测到上一个任务仍在处理中。建议先等待当前任务结束，再提交新的 PDF。</div>
+    <div id="job-warning" class="job-warning hidden">Phát hiện tác vụ trước vẫn đang xử lý. Nên đợi tác vụ hiện tại kết thúc rồi hãy gửi PDF mới.</div>
 
     <form id="job-form" class="form" novalidate>
       <input id="ocr_provider" name="ocr_provider" type="hidden" value="mineru" />
       <input id="mineru_token" name="mineru_token" type="hidden" value="" />
       <input id="paddle_token" name="paddle_token" type="hidden" value="" />
+      <input id="ai_ocr_api_key" name="ai_ocr_api_key" type="hidden" value="" />
       <input id="api_key" name="api_key" type="hidden" value="" />
 
       <div class="upload-tile upload-tile-hero">
@@ -22,33 +23,33 @@
                 <circle cx="12" cy="16" r="1.2" fill="currentColor"/>
               </svg>
             </span>
-            <strong id="credential-gate-title">请先完成接口设置</strong>
-            <em id="credential-gate-help">填写 OCR Token 和 DeepSeek Key 后即可上传 PDF。</em>
-            <button id="credential-gate-action" type="button" class="credential-gate-action">去设置接口</button>
+            <strong id="credential-gate-title">Vui lòng hoàn tất cài đặt API</strong>
+            <em id="credential-gate-help">Điền OCR Token và DeepSeek Key để tải lên PDF.</em>
+            <button id="credential-gate-action" type="button" class="credential-gate-action">Đi đến cài đặt API</button>
           </div>
         </div>
         <span id="upload-glyph" class="upload-glyph" aria-hidden="true">
           <span class="upload-glyph-h"></span>
           <span class="upload-glyph-v"></span>
         </span>
-        <strong id="file-label">拖拽或点击上传 PDF</strong>
-        <em id="upload-help">上传后会先完成文件校验，再进入任务处理。</em>
+        <strong id="file-label">Kéo thả hoặc nhấp để tải lên PDF</strong>
+        <em id="upload-help">Sau khi tải lên, hệ thống sẽ kiểm tra tệp rồi bắt đầu xử lý tác vụ.</em>
         <div class="upload-meta upload-meta-inline">
-          <span>单个 PDF</span>
-          <span>最大 100MB</span>
-          <span>最多 300 页</span>
+          <span>PDF đơn</span>
+          <span>Tối đa 100MB</span>
+          <span>Tối đa 300 trang</span>
         </div>
-        <div id="upload-status" class="upload-status hidden">尚未选择文件</div>
+        <div id="upload-status" class="upload-status hidden">Chưa chọn tệp</div>
         <div id="upload-progress-panel" class="upload-progress-panel hidden" aria-live="polite">
-          <span id="upload-progress-text">上传中</span>
+          <span id="upload-progress-text">Đang tải lên</span>
         </div>
         <div id="upload-action-slot" class="upload-action-slot hidden">
           <div class="upload-action-group">
-            <button id="page-range-btn" type="button" class="page-range-mini secondary" aria-label="分页翻译" title="分页翻译">分页翻译</button>
-            <button id="submit-btn" type="submit" disabled>全书翻译</button>
+            <button id="page-range-btn" type="button" class="page-range-mini secondary" aria-label="Dịch theo trang" title="Dịch theo trang">Dịch theo trang</button>
+            <button id="submit-btn" type="submit" disabled>Dịch toàn bộ</button>
           </div>
         </div>
-      <page-range-summary id="page-range-summary" class="hidden">已选择页码：-</page-range-summary>
+      <page-range-summary id="page-range-summary" class="hidden">Trang đã chọn: -</page-range-summary>
       </div>
       <inline-error-box id="error-box-inline" class="hidden">-</inline-error-box>
     </form>
@@ -57,8 +58,8 @@
   <job-status-card id="status-section"></job-status-card>
 
   <div class="query-entry">
-    <button id="open-query-btn" type="button" class="secondary">最近任务</button>
-    <button id="credentials-btn" type="button" class="icon-button secondary" aria-label="接口设置" title="接口设置">
+    <button id="open-query-btn" type="button" class="secondary">Tác vụ gần đây</button>
+    <button id="credentials-btn" type="button" class="icon-button secondary" aria-label="Cài đặt API" title="Cài đặt API">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <path d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.2 7.2 0 0 0-1.63-.94l-.36-2.54a.5.5 0 0 0-.49-.42h-3.84a.5.5 0 0 0-.49.42l-.36 2.54c-.58.22-1.12.54-1.63.94l-2.39-.96a.5.5 0 0 0-.6.22L2.71 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32a.5.5 0 0 0 .6.22l2.39-.96c.5.4 1.05.72 1.63.94l.36 2.54a.5.5 0 0 0 .49.42h3.84a.5.5 0 0 0 .49-.42l.36-2.54c.58-.22 1.13-.54 1.63-.94l2.39.96a.5.5 0 0 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58Z" stroke="currentColor" stroke-width="1.45" stroke-linejoin="round"/>
         <circle cx="12" cy="12" r="2.9" stroke="currentColor" stroke-width="1.45"/>

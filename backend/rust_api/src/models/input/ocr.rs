@@ -14,6 +14,12 @@ pub struct OcrInput {
     #[serde(default)]
     pub paddle_token: String,
     #[serde(default)]
+    pub ai_ocr_api_key: String,
+    #[serde(default)]
+    pub ai_ocr_model: String,
+    #[serde(default)]
+    pub ai_ocr_base_url: String,
+    #[serde(default)]
     pub paddle_api_url: String,
     #[serde(default = "default_paddle_model")]
     pub paddle_model: String,
@@ -48,6 +54,9 @@ impl Default for OcrInput {
             mineru_token: String::new(),
             model_version: default_model_version(),
             paddle_token: String::new(),
+            ai_ocr_api_key: String::new(),
+            ai_ocr_model: String::new(),
+            ai_ocr_base_url: String::new(),
             paddle_api_url: String::new(),
             paddle_model: default_paddle_model(),
             is_ocr: false,

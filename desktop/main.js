@@ -58,6 +58,7 @@ function createDefaultDesktopConfig() {
     ocrProvider: DEFAULT_OCR_PROVIDER,
     mineruToken: "",
     paddleToken: "",
+    aiOcrApiKey: "",
     modelApiKey: "",
     model: DEFAULT_MODEL,
     baseUrl: DEFAULT_BASE_URL,
@@ -85,6 +86,7 @@ function normalizeDesktopConfig(raw = {}) {
     ocrProvider: normalizeOcrProvider(raw.ocrProvider),
     mineruToken: normalizeTrimmedString(raw.mineruToken, defaults.mineruToken),
     paddleToken: normalizeTrimmedString(raw.paddleToken, defaults.paddleToken),
+    aiOcrApiKey: normalizeTrimmedString(raw.aiOcrApiKey, defaults.aiOcrApiKey),
     modelApiKey: normalizeTrimmedString(raw.modelApiKey, defaults.modelApiKey),
     model: normalizeTrimmedString(raw.model, defaults.model),
     baseUrl: normalizeTrimmedString(raw.baseUrl, defaults.baseUrl),
@@ -104,6 +106,7 @@ function mergeDesktopConfig(currentConfig, payload = {}) {
     "ocrProvider",
     "mineruToken",
     "paddleToken",
+    "aiOcrApiKey",
     "modelApiKey",
     "model",
     "baseUrl",
@@ -132,6 +135,7 @@ function buildBrowserConfig(config) {
     ocrProvider: config.ocrProvider || DEFAULT_OCR_PROVIDER,
     mineruToken: config.mineruToken || "",
     paddleToken: config.paddleToken || "",
+    aiOcrApiKey: config.aiOcrApiKey || "",
     modelApiKey: config.modelApiKey || "",
   };
 }
@@ -230,8 +234,8 @@ function maybeShowCloseToTrayHint() {
   if (process.platform === "win32" && typeof tray.displayBalloon === "function") {
     tray.displayBalloon({
       iconType: "info",
-      title: "RetainPDF 正在后台运行",
-      content: "窗口已隐藏到系统托盘，本地 API 仍可继续使用。右键托盘图标可退出。",
+      title: "RetainPDF đang chạy nền",
+      content: "Cửa sổ đã được ẩn xuống khay hệ thống, API cục bộ vẫn tiếp tục hoạt động. Nhấp chuột phải vào biểu tượng khay để thoát.",
     });
   }
   persistCloseToTrayHintShown();
@@ -246,13 +250,13 @@ function createTray() {
   tray.setContextMenu(
     Menu.buildFromTemplate([
       {
-        label: "显示主窗口",
+        label: "Hiển thị cửa sổ chính",
         click: () => {
           showMainWindow();
         },
       },
       {
-        label: "退出",
+        label: "Thoát",
         click: () => {
           isQuitting = true;
           app.quit();
@@ -303,7 +307,7 @@ async function createSplashWindow() {
     },
   });
   await splashWindow.loadFile(path.join(__dirname, "splash.html"));
-  updateSplashProgress(6, "正在准备运行环境", "正在检查桌面组件与本地资源");
+  updateSplashProgress(6, "Đang chuẩn bị môi trường chạy", "Đang kiểm tra thành phần desktop và tài nguyên cục bộ");
 }
 
 function waitForPort(host, port, timeoutMs) {
@@ -432,6 +436,9 @@ function resolvePythonRuntime(backendRoot) {
   }
   if (app.isPackaged) {
     return { command: "", bundledHome: null };
+  }
+  if (process.platform === "win32") {
+    return { command: "python", bundledHome: null };
   }
   return { command: "python3", bundledHome: null };
 }
@@ -640,7 +647,7 @@ function resolveTypstBinary(backendRoot) {
 }
 
 async function startBundledBackend() {
-  updateSplashProgress(18, "正在检查运行文件", "正在校验后端、Python 和脚本资源");
+  updateSplashProgress(18, "Đang kiểm tra tệp chạy", "Đang xác minh backend, Python và tài nguyên script");
   const backendRoot = resolveBackendRoot();
   const backendBin = resolveBackendBinary(backendRoot);
   let pythonRuntime = resolvePythonRuntime(backendRoot);
@@ -701,7 +708,7 @@ async function startBundledBackend() {
       console.warn(
         `[desktop] bundled mac python startup probe failed, fallback to system python: ${startupProbe.reason}\n${startupProbe.stderr || ""}`.trim(),
       );
-      updateSplashProgress(26, "正在检查 Python 运行时", "内置 Python 不可用，正在回退系统 Python");
+      updateSplashProgress(26, "Đang kiểm tra Python runtime", "Python tích hợp không khả dụng, đang chuyển sang Python hệ thống");
       const fallbackRuntime = { command: "python3", bundledHome: null };
       const fallbackProbe = await probePythonRuntime(fallbackRuntime, {
         timeoutMs: 10000,
@@ -728,12 +735,12 @@ async function startBundledBackend() {
             dependencyProbe.stderr || dependencyProbe.stdout || "",
           ].filter(Boolean).join("\n"),
         );
-        updateSplashProgress(26, "正在检查 Python 运行时", "内置 Python 启动较慢，继续启动本地服务");
+        updateSplashProgress(26, "Đang kiểm tra Python runtime", "Python tích hợp khởi động chậm, tiếp tục khởi động dịch vụ cục bộ");
       } else if (pythonRuntime.bundledHome && !app.isPackaged) {
         console.warn(
           `[desktop] bundled mac python dependency probe failed, fallback to system python: ${dependencyProbe.reason}\n${dependencyProbe.stderr || ""}`.trim(),
         );
-        updateSplashProgress(26, "正在检查 Python 运行时", "内置 Python 不可用，正在回退系统 Python");
+        updateSplashProgress(26, "Đang kiểm tra Python runtime", "Python tích hợp không khả dụng, đang chuyển sang Python hệ thống");
         const fallbackRuntime = { command: "python3", bundledHome: null };
         const fallbackProbe = await probePythonRuntime(fallbackRuntime, {
           timeoutMs: 10000,
@@ -765,7 +772,7 @@ async function startBundledBackend() {
   fs.mkdirSync(dataRoot, { recursive: true });
   fs.mkdirSync(rustApiRoot, { recursive: true });
   fs.mkdirSync(typstPackageCachePath, { recursive: true });
-  updateSplashProgress(34, "正在准备工作目录", "正在初始化本地数据目录");
+  updateSplashProgress(34, "Đang chuẩn bị thư mục làm việc", "Đang khởi tạo thư mục dữ liệu cục bộ");
 
   const apiPortBusy = await canConnectToPort("127.0.0.1", apiPort);
   logDesktop(`[desktop] port ${apiPort} busy=${apiPortBusy}`);
@@ -773,20 +780,20 @@ async function startBundledBackend() {
     if (await canReuseExistingBackend(apiPort)) {
       usingExternalBackend = true;
       logDesktop(`[desktop] reusing existing backend on port ${apiPort}`);
-      updateSplashProgress(52, "检测到已有本地服务", "桌面端将直接复用当前后端");
+      updateSplashProgress(52, "Phát hiện dịch vụ cục bộ có sẵn", "Ứng dụng desktop sẽ dùng lại backend hiện tại");
       await waitForPort("127.0.0.1", apiPort, 5000);
-      updateSplashProgress(92, "本地服务已就绪", "正在加载主界面");
+      updateSplashProgress(92, "Dịch vụ cục bộ đã sẵn sàng", "Đang tải giao diện chính");
       return;
     }
     throw new Error(
-      `端口 ${apiPort} 已被其他进程占用，且不是可复用的 RetainPDF 后端。请先关闭占用进程后再启动桌面端。`,
+      `Cổng ${apiPort} đang bị tiến trình khác sử dụng và không phải backend RetainPDF có thể dùng lại. Vui lòng đóng tiến trình đó rồi khởi động lại ứng dụng desktop.`,
     );
   }
 
   const simplePortBusy = await canConnectToPort("127.0.0.1", simplePort);
   logDesktop(`[desktop] port ${simplePort} busy=${simplePortBusy}`);
   if (simplePortBusy) {
-    throw new Error(`端口 ${simplePort} 已被其他进程占用，请先释放后再启动桌面端。`);
+    throw new Error(`Cổng ${simplePort} đang bị tiến trình khác sử dụng, vui lòng giải phóng cổng rồi khởi động lại ứng dụng desktop.`);
   }
 
   const env = {
@@ -830,7 +837,7 @@ async function startBundledBackend() {
     env.TYPST_BIN = typstBin;
   }
 
-  updateSplashProgress(52, "正在启动本地服务", "Rust API 与 Python worker 正在启动");
+  updateSplashProgress(52, "Đang khởi động dịch vụ cục bộ", "Rust API và Python worker đang khởi động");
   logDesktop(`[desktop] spawning backend: ${backendBin}`);
   backendChild = spawn(backendBin, [], {
     cwd: backendRoot,
@@ -865,8 +872,8 @@ async function startBundledBackend() {
     waitingProgress = Math.min(waitingProgress + 3, 88);
     updateSplashProgress(
       waitingProgress,
-      "正在连接本地服务",
-      "首次启动可能稍慢，请稍候",
+      "Đang kết nối dịch vụ cục bộ",
+      "Lần đầu khởi động có thể chậm hơn, vui lòng đợi",
     );
   }, 500);
   const backendReadyTimeoutMs = process.platform === "darwin" && app.isPackaged ? 60000 : 30000;
@@ -874,7 +881,7 @@ async function startBundledBackend() {
   await waitForPort("127.0.0.1", apiPort, backendReadyTimeoutMs);
   clearInterval(waitingTimer);
   logDesktop(`[desktop] backend ready on port ${apiPort}`);
-  updateSplashProgress(92, "本地服务已就绪", "正在加载主界面");
+  updateSplashProgress(92, "Dịch vụ cục bộ đã sẵn sàng", "Đang tải giao diện chính");
 }
 
 function createWindow() {
@@ -916,18 +923,18 @@ function createWindow() {
   mainWindow.webContents.on("did-fail-load", (_event, errorCode, errorDescription, validatedURL) => {
     const detail = `code=${errorCode} url=${validatedURL || "unknown"} error=${errorDescription || "unknown"}`;
     logDesktopError(`[desktop] renderer load failed: ${detail}`);
-    dialog.showErrorBox("RetainPDF 页面加载失败", detail);
+    dialog.showErrorBox("RetainPDF tải trang thất bại", detail);
   });
 
   mainWindow.webContents.on("render-process-gone", (_event, details) => {
     const detail = `reason=${details?.reason || "unknown"} exitCode=${details?.exitCode ?? "unknown"}`;
     logDesktopError(`[desktop] renderer process gone: ${detail}`);
-    dialog.showErrorBox("RetainPDF 渲染进程异常退出", detail);
+    dialog.showErrorBox("Tiến trình hiển thị RetainPDF đã thoát bất thường", detail);
   });
 
   mainWindow.webContents.once("did-finish-load", () => {
     logDesktop("[desktop] frontend loaded; showing main window");
-    updateSplashProgress(100, "准备完成", "正在进入主界面");
+    updateSplashProgress(100, "Chuẩn bị hoàn tất", "Đang vào giao diện chính");
     mainWindow.show();
     if (splashWindow && !splashWindow.isDestroyed()) {
       splashWindow.close();

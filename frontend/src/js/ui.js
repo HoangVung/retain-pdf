@@ -97,7 +97,7 @@ function updateRing(job) {
   const presentation = resolveDisplayedStagePresentation(job, state.currentJobEvents);
   const stageText = presentation.detail;
   const ringLabelText = presentation.label;
-  const ringValueText = stageText || "准备中";
+  const ringValueText = stageText || "Đang chuẩn bị";
   const statusCard = document.querySelector("job-status-card");
   if (statusCard?.setStagePresentation && !statusCard?.renderSnapshot) {
     statusCard.setStagePresentation({
@@ -219,7 +219,7 @@ export function renderJob(payload, eventsPayload = null, manifestPayload = null)
   if (statusCard?.renderSnapshot) {
     statusCard.renderSnapshot({
       label: stagePresentation.label,
-      value: stageText || "准备中",
+      value: stageText || "Đang chuẩn bị",
       stageKey: stagePresentation.stageKey,
       elapsed: resolveLiveDurations(job).totalElapsedText,
       progressCurrent: stagePresentation.progressCurrent,

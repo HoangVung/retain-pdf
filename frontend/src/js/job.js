@@ -222,23 +222,23 @@ export function resolveJobActions(job) {
 export function summarizeStatus(status) {
   switch (status) {
     case "queued":
-      return "任务已提交，等待后端开始处理。";
+      return "Tác vụ đã gửi, đợi backend xử lý.";
     case "running":
-      return "任务正在处理中，请等待当前阶段完成。";
+      return "Tác vụ đang xử lý, vui lòng đợi giai đoạn hiện tại hoàn thành.";
     case "succeeded":
-      return "任务已完成，可以下载结果。";
+      return "Tác vụ đã hoàn thành, có thể tải xuống kết quả.";
     case "canceled":
-      return "任务已取消。";
+      return "Tác vụ đã hủy.";
     case "failed":
-      return "任务已失败，请检查报错提示后重试。";
+      return "Tác vụ thất bại, vui lòng kiểm tra thông báo lỗi rồi thử lại.";
     default:
-      return "等待提交任务。";
+      return "Đang đợi gửi tác vụ.";
   }
 }
 
 export function summarizePublicError(payload) {
   if (payload.status === "canceled") {
-    return "任务已取消。";
+    return "Tác vụ đã hủy.";
   }
   if (payload.status === "failed") {
     const detail = firstNonEmpty(
@@ -254,7 +254,7 @@ export function summarizePublicError(payload) {
       payload.failure?.raw_exception_message,
       payload.failure?.suggestion,
     );
-    return detail || "任务失败。请检查输入文件与配置后重试。";
+    return detail || "Tác vụ thất bại. Vui lòng kiểm tra tệp đầu vào và cấu hình rồi thử lại.";
   }
   if (payload.error) {
     return payload.error;
@@ -267,22 +267,22 @@ export function summarizeDiagnostic(payload) {
   if (failure) {
     const retryable = firstDefined(failure.retryable, payload.failure_diagnostic?.retryable);
     const lines = [
-      `阶段: ${firstNonEmpty(failure.stage, failure.failed_stage, failure.provider_stage) || "-"}`,
-      `分类: ${firstNonEmpty(failure.category, failure.failure_category, failure.error_type, failure.failure_code) || "-"}`,
-      `摘要: ${firstNonEmpty(failure.summary, failure.detail, failure.raw_excerpt, failure.raw_exception_message) || "-"}`,
-      `可重试: ${typeof retryable === "boolean" ? (retryable ? "是" : "否") : "-"}`,
+      `Giai đoạn: ${firstNonEmpty(failure.stage, failure.failed_stage, failure.provider_stage) || "-"}`,
+      `Phân loại: ${firstNonEmpty(failure.category, failure.failure_category, failure.error_type, failure.failure_code) || "-"}`,
+      `Tóm tắt: ${firstNonEmpty(failure.summary, failure.detail, failure.raw_excerpt, failure.raw_exception_message) || "-"}`,
+      `Có thể thử lại: ${typeof retryable === "boolean" ? (retryable ? "Có" : "Không") : "-"}`,
     ];
     if (firstNonEmpty(failure.upstream_host, failure.provider)) {
-      lines.push(`上游: ${firstNonEmpty(failure.upstream_host, failure.provider)}`);
+      lines.push(`Thượng nguồn: ${firstNonEmpty(failure.upstream_host, failure.provider)}`);
     }
     if (firstNonEmpty(failure.root_cause, failure.raw_exception_type)) {
-      lines.push(`根因: ${firstNonEmpty(failure.root_cause, failure.raw_exception_type)}`);
+      lines.push(`Nguyên nhân gốc rễ: ${firstNonEmpty(failure.root_cause, failure.raw_exception_type)}`);
     }
     if (failure.suggestion) {
-      lines.push(`建议: ${failure.suggestion}`);
+      lines.push(`Đề xuất: ${failure.suggestion}`);
     }
     if (firstNonEmpty(failure.last_log_line, failure.raw_excerpt)) {
-      lines.push(`最后日志: ${firstNonEmpty(failure.last_log_line, failure.raw_excerpt)}`);
+      lines.push(`Nhật ký cuối: ${firstNonEmpty(failure.last_log_line, failure.raw_excerpt)}`);
     }
     return lines.join("\n");
   }
@@ -291,22 +291,22 @@ export function summarizeDiagnostic(payload) {
     return "-";
   }
   const lines = [
-    `阶段: ${diag.stage || diag.failed_stage || "-"}`,
-    `类型: ${diag.type || diag.error_kind || diag.error_type || "-"}`,
-    `摘要: ${diag.summary || diag.detail || diag.raw_excerpt || "-"}`,
-    `可重试: ${typeof diag.retryable === "boolean" ? (diag.retryable ? "是" : "否") : "-"}`,
+    `Giai đoạn: ${diag.stage || diag.failed_stage || "-"}`,
+    `Loại: ${diag.type || diag.error_kind || diag.error_type || "-"}`,
+    `Tóm tắt: ${diag.summary || diag.detail || diag.raw_excerpt || "-"}`,
+    `Có thể thử lại: ${typeof diag.retryable === "boolean" ? (diag.retryable ? "Có" : "Không") : "-"}`,
   ];
   if (diag.upstream_host) {
-    lines.push(`上游主机: ${diag.upstream_host}`);
+    lines.push(`Host thượng nguồn: ${diag.upstream_host}`);
   }
   if (diag.root_cause || diag.raw_exception_type) {
-    lines.push(`根因: ${diag.root_cause || diag.raw_exception_type}`);
+    lines.push(`Nguyên nhân gốc rễ: ${diag.root_cause || diag.raw_exception_type}`);
   }
   if (diag.suggestion) {
-    lines.push(`建议: ${diag.suggestion}`);
+    lines.push(`Đề xuất: ${diag.suggestion}`);
   }
   if (diag.last_log_line || diag.raw_excerpt) {
-    lines.push(`最后日志: ${diag.last_log_line || diag.raw_excerpt}`);
+    lines.push(`Nhật ký cuối: ${diag.last_log_line || diag.raw_excerpt}`);
   }
   return lines.join("\n");
 }
@@ -321,12 +321,12 @@ function formatDurationMs(ms) {
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
   if (hours > 0) {
-    return `${hours}小时 ${minutes}分 ${seconds}秒`;
+    return `${hours} giờ ${minutes} phút ${seconds} giây`;
   }
   if (minutes > 0) {
-    return `${minutes}分 ${seconds}秒`;
+    return `${minutes} phút ${seconds} giây`;
   }
-  return `${seconds}秒`;
+  return `${seconds} giây`;
 }
 
 export function summarizeRuntimeField(value) {
@@ -347,7 +347,7 @@ export function formatEventTimestamp(value) {
   if (Number.isNaN(parsed.getTime())) {
     return rawValue;
   }
-  return new Intl.DateTimeFormat("zh-CN", {
+  return new Intl.DateTimeFormat("vi-VN", {
     month: "2-digit",
     day: "2-digit",
     hour: "2-digit",
@@ -371,7 +371,7 @@ export function formatJobFinishedAt(payload) {
     return rawValue;
   }
 
-  return new Intl.DateTimeFormat("zh-CN", {
+  return new Intl.DateTimeFormat("vi-VN", {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -403,10 +403,10 @@ export function formatJobDuration(payload) {
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
   if (hours > 0) {
-    return `${hours}小时 ${minutes}分 ${seconds}秒`;
+    return `${hours} giờ ${minutes} phút ${seconds} giây`;
   }
   if (minutes > 0) {
-    return `${minutes}分 ${seconds}秒`;
+    return `${minutes} phút ${seconds} giây`;
   }
-  return `${seconds}秒`;
+  return `${seconds} giây`;
 }

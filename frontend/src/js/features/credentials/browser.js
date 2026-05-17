@@ -1,8 +1,10 @@
 import { $ } from "../../dom.js";
 import { API_PREFIX } from "../../constants.js";
 import {
+  getTranslationProviderDefinition,
   getOcrProviderDefinition,
   normalizeOcrProvider,
+  normalizeTranslationProvider,
   TRANSLATION_PROVIDER_DEFINITION,
 } from "../../provider-config.js";
 
@@ -11,6 +13,7 @@ export function mountBrowserCredentialsFeature({
   applyKeyInputs,
   defaultMineruToken,
   defaultPaddleToken,
+  defaultAiOcrApiKey,
   defaultModelApiKey,
   defaultModelBaseUrl,
   getTaskOptions,
@@ -37,16 +40,16 @@ export function mountBrowserCredentialsFeature({
       return;
     }
     dialog.dataset.setupMode = setupMode ? "1" : "0";
-    $("browser-credentials-title").textContent = setupMode ? "首次配置" : "接口设置";
+    $("browser-credentials-title").textContent = setupMode ? "Cấu hình ban đầu" : "Cài đặt API";
     const subtitle = $("browser-credentials-subtitle");
     if (subtitle) {
       const text = setupMode
-        ? "填写 OCR Token 和 DeepSeek Key，检测通过后保存。"
+        ? "Điền OCR Token và DeepSeek Key, lưu sau khi kiểm tra thành công."
         : "";
       subtitle.textContent = text;
       subtitle.classList.toggle("hidden", !text);
     }
-    $("browser-credentials-save-btn").textContent = setupMode ? "保存并启动" : "保存";
+    $("browser-credentials-save-btn").textContent = setupMode ? "Lưu và khởi động" : "Lưu";
     $("browser-credentials-tabs")?.classList.toggle("hidden", setupMode);
     if (setupMode) {
       activateCredentialTab("api");
@@ -84,6 +87,10 @@ export function mountBrowserCredentialsFeature({
 
   function currentOcrProvider() {
     return normalizeOcrProvider($("ocr_provider")?.value);
+  }
+
+  function currentTranslationProvider() {
+    return normalizeTranslationProvider($("browser-translation-provider-select")?.value || getTaskOptions?.().translationProvider);
   }
 
   function syncOcrProviderControls(providerId = currentOcrProvider()) {
@@ -139,12 +146,12 @@ export function mountBrowserCredentialsFeature({
     box.classList.toggle("hidden", !content);
     box.classList.toggle("is-valid", tone === "valid");
     box.classList.toggle("is-error", tone === "error");
-    summaryEl.textContent = content || "未检测";
-    timeEl.textContent = checkedAt ? `检测时间 ${checkedAt}` : "-";
+    summaryEl.textContent = content || "Chưa kiểm tra";
+    timeEl.textContent = checkedAt ? `Thời gian kiểm tra ${checkedAt}` : "-";
   }
 
   function currentTimeLabel() {
-    return new Date().toLocaleTimeString("zh-CN", {
+    return new Date().toLocaleTimeString("vi-VN", {
       hour: "2-digit",
       minute: "2-digit",
       second: "2-digit",
@@ -182,7 +189,7 @@ export function mountBrowserCredentialsFeature({
       };
     }
     if (showResult) {
-      setOcrValidationMessage(`正在检测 ${definition.label} Token…`, "", definition.id);
+      setOcrValidationMessage(`Đang kiểm tra ${definition.label} Token…`, "", definition.id);
     }
     try {
       const result = await validateOcrToken(API_PREFIX, definition.id, normalizedToken);
@@ -191,19 +198,19 @@ export function mountBrowserCredentialsFeature({
       state.ocrValidationStatus = result.status || "";
       if (showResult) {
         const hint = result.operator_hint ? ` ${result.operator_hint}` : "";
-        const message = result.summary || `${definition.label} Token 检测结果：${result.status || "unknown"}`;
+        const message = result.summary || `${definition.label} Kết quả kiểm tra Token：${result.status || "unknown"}`;
         setOcrValidationMessage(`${message}${hint}`.trim(), result.ok ? "valid" : "error", definition.id);
       }
       return result;
     } catch (_err) {
       resetOcrValidationCache();
       if (showResult) {
-        setOcrValidationMessage(`${definition.label} Token 检测失败，请稍后重试。`, "error", definition.id);
+        setOcrValidationMessage(`${definition.label} Kiểm tra Token thất bại, vui lòng thử lại sau.`, "error", definition.id);
       }
       return {
         ok: false,
         status: "network_error",
-        summary: `${definition.label} Token 检测失败，请稍后重试。`,
+        summary: `${definition.label} Kiểm tra Token thất bại, vui lòng thử lại sau.`,
       };
     }
   }
@@ -217,12 +224,12 @@ export function mountBrowserCredentialsFeature({
       return { ok: false, status: 0 };
     }
     if (showResult) {
-      setDeepSeekValidationMessage("正在检测 DeepSeek 接口…");
+      setDeepSeekValidationMessage("Đang kiểm tra API DeepSeek…");
     }
     try {
       const result = await validateDeepSeekToken(API_PREFIX, {
         api_key: modelApiKey,
-        base_url: defaultModelBaseUrl(),
+        base_url: getTranslationProviderDefinition(currentTranslationProvider()).baseUrl || defaultModelBaseUrl(),
       });
       if (showResult) {
         setDeepSeekValidationMessage(
@@ -247,15 +254,18 @@ export function mountBrowserCredentialsFeature({
       .filter((item) => item && item.currency && item.total_balance)
       .map((item) => `${item.currency} ${item.total_balance}`);
     if (parts.length > 0) {
-      return `余额 ${parts.join("，")}`;
+      return `Số dư ${parts.join("，")}`;
     }
     if (result?.is_available) {
-      return "余额可用";
+      return "Số dư khả dụng";
     }
-    return "余额不足";
+    return "Số dư không đủ";
   }
 
   async function runDeepSeekBalanceCheck(apiKey) {
+    if (currentTranslationProvider() !== "deepseek") {
+      return { ok: false, status: "unsupported_provider" };
+    }
     const modelApiKey = `${apiKey || ""}`.trim();
     if (!modelApiKey) {
       return { ok: false, status: "missing_key" };
@@ -266,7 +276,7 @@ export function mountBrowserCredentialsFeature({
     try {
       return await queryDeepSeekBalance(API_PREFIX, {
         api_key: modelApiKey,
-        base_url: defaultModelBaseUrl(),
+        base_url: getTranslationProviderDefinition("deepseek").baseUrl || defaultModelBaseUrl(),
       });
     } catch (_err) {
       return { ok: false, status: "network_error" };
@@ -278,8 +288,11 @@ export function mountBrowserCredentialsFeature({
       dialog: $("browser-credentials-dialog"),
       mineruInput: $("browser-mineru-token"),
       paddleInput: $("browser-paddle-token"),
+      aiOcrInput: $(`browser-${currentOcrProvider()}-token`),
       apiKeyInput: $("browser-api-key"),
       mathModeSelect: $("browser-job-math-mode"),
+      translationProviderSelect: $("browser-translation-provider-select"),
+      targetLanguageSelect: $("browser-job-target-language"),
       trigger: $("credentials-btn"),
     };
   }
@@ -288,8 +301,11 @@ export function mountBrowserCredentialsFeature({
     const {
       mineruInput,
       paddleInput,
+      aiOcrInput,
       apiKeyInput,
       mathModeSelect,
+      translationProviderSelect,
+      targetLanguageSelect,
     } = browserCredentialElements();
     const taskOptions = getTaskOptions?.() || {};
     if (mineruInput) {
@@ -298,12 +314,21 @@ export function mountBrowserCredentialsFeature({
     if (paddleInput) {
       paddleInput.value = $("paddle_token").value || "";
     }
+    if (aiOcrInput) {
+      aiOcrInput.value = $("ai_ocr_api_key").value || "";
+    }
     if (apiKeyInput) {
       apiKeyInput.value = $("api_key").value || "";
+    }
+    if (translationProviderSelect) {
+      translationProviderSelect.value = normalizeTranslationProvider(taskOptions.translationProvider);
     }
     syncOcrProviderControls(currentOcrProvider());
     if (mathModeSelect) {
       mathModeSelect.value = taskOptions.mathMode === "placeholder" ? "placeholder" : "direct_typst";
+    }
+    if (targetLanguageSelect) {
+      targetLanguageSelect.value = taskOptions.targetLanguageName || "Tiếng Việt";
     }
     setOcrValidationMessage("", "", "mineru");
     setOcrValidationMessage("", "", "paddle");
@@ -316,17 +341,31 @@ export function mountBrowserCredentialsFeature({
     const {
       mineruInput,
       paddleInput,
+      aiOcrInput,
       apiKeyInput,
       mathModeSelect,
+      translationProviderSelect,
+      targetLanguageSelect,
     } = browserCredentialElements();
+    const translationProvider = getTranslationProviderDefinition(translationProviderSelect?.value);
+    const ocrDefinition = getOcrProviderDefinition(currentOcrProvider());
+    const ocrToken = currentProviderInputValue().trim();
+    if ($(ocrDefinition.tokenField)) {
+      $(ocrDefinition.tokenField).value = ocrToken;
+    }
     applyKeyInputs({
       ocrProvider: currentOcrProvider(),
       mineruToken: mineruInput?.value?.trim() || "",
       paddleToken: paddleInput?.value?.trim() || "",
+      aiOcrApiKey: ocrDefinition.tokenField === "ai_ocr_api_key" ? ocrToken : aiOcrInput?.value?.trim() || "",
       modelApiKey: apiKeyInput?.value?.trim() || "",
     });
     saveTaskOptions?.({
+      translationProvider: translationProvider.id,
+      model: translationProvider.model,
+      baseUrl: translationProvider.baseUrl,
       mathMode: mathModeSelect?.value || "direct_typst",
+      targetLanguageName: targetLanguageSelect?.value || "Tiếng Việt",
       translateTitles: true,
     });
     saveBrowserStoredConfig();
@@ -336,12 +375,22 @@ export function mountBrowserCredentialsFeature({
     const {
       mineruInput,
       paddleInput,
+      aiOcrInput,
       apiKeyInput,
       mathModeSelect,
+      translationProviderSelect,
+      targetLanguageSelect,
     } = browserCredentialElements();
+    const translationProvider = getTranslationProviderDefinition(translationProviderSelect?.value);
     const provider = currentOcrProvider();
+    const ocrDefinition = getOcrProviderDefinition(provider);
+    const ocrToken = currentProviderInputValue().trim();
+    if ($(ocrDefinition.tokenField)) {
+      $(ocrDefinition.tokenField).value = ocrToken;
+    }
     const mineruToken = mineruInput?.value?.trim() || "";
     const paddleToken = paddleInput?.value?.trim() || "";
+    const aiOcrApiKey = ocrDefinition.tokenField === "ai_ocr_api_key" ? ocrToken : aiOcrInput?.value?.trim() || "";
     const modelApiKey = apiKeyInput?.value?.trim() || "";
     await saveDesktopConfig?.(
       mineruToken,
@@ -352,11 +401,16 @@ export function mountBrowserCredentialsFeature({
       {
         ocrProvider: provider,
         paddleToken,
+        aiOcrApiKey,
         markConfigured: currentCredentialDialogSetupMode(),
       },
     );
     saveTaskOptions?.({
+      translationProvider: translationProvider.id,
+      model: translationProvider.model,
+      baseUrl: translationProvider.baseUrl,
       mathMode: mathModeSelect?.value || "direct_typst",
+      targetLanguageName: targetLanguageSelect?.value || "Tiếng Việt",
       translateTitles: true,
     });
   }
@@ -380,7 +434,11 @@ export function mountBrowserCredentialsFeature({
   async function ensureOcrCredentialsReady({ onMissingToken, onInvalidToken } = {}) {
     const provider = currentOcrProvider();
     const definition = getOcrProviderDefinition(provider);
-    const fallbackToken = definition.id === "paddle" ? defaultPaddleToken() : defaultMineruToken();
+    const fallbackToken = definition.id === "paddle"
+      ? defaultPaddleToken()
+      : definition.id === "mineru"
+        ? defaultMineruToken()
+        : defaultAiOcrApiKey();
     const token = ($(`${definition.tokenField}`)?.value || fallbackToken).trim();
     if (!token) {
       onMissingToken?.();
@@ -447,8 +505,15 @@ export function mountBrowserCredentialsFeature({
   }
 
   function currentProviderInputValue() {
-    const { mineruInput, paddleInput } = browserCredentialElements();
-    return currentOcrProvider() === "paddle" ? paddleInput?.value || "" : mineruInput?.value || "";
+    const { mineruInput, paddleInput, aiOcrInput } = browserCredentialElements();
+    const provider = currentOcrProvider();
+    if (provider === "paddle") {
+      return paddleInput?.value || "";
+    }
+    if (provider === "mineru") {
+      return mineruInput?.value || "";
+    }
+    return aiOcrInput?.value || "";
   }
 
   async function handleBrowserOcrValidate() {
@@ -457,23 +522,23 @@ export function mountBrowserCredentialsFeature({
 
   async function handleBrowserDeepSeekValidate() {
     const { apiKeyInput } = browserCredentialElements();
-    setDeepSeekValidationMessage("正在检测 DeepSeek 和余额…");
+    setDeepSeekValidationMessage("Đang kiểm tra DeepSeek và số dư…");
     const result = await runDeepSeekConnectivityCheck(apiKeyInput?.value || "", { showResult: false });
     if (result.ok) {
       const balance = await runDeepSeekBalanceCheck(apiKeyInput?.value || "");
       if (balance.status === "unsupported_provider") {
-        setDeepSeekValidationMessage("DeepSeek 可用", "valid");
-        setDeepSeekAccountStatus("接口可用，当前 provider 不支持余额查询", "valid", currentTimeLabel());
+        setDeepSeekValidationMessage("DeepSeek khả dụng", "valid");
+        setDeepSeekAccountStatus("API khả dụng, provider hiện tại không hỗ trợ truy vấn số dư", "valid", currentTimeLabel());
         return;
       }
       if (balance.status === "network_error") {
-        setDeepSeekValidationMessage("DeepSeek 可用，余额查询失败", "valid");
-        setDeepSeekAccountStatus("接口可用，余额查询失败", "valid", currentTimeLabel());
+        setDeepSeekValidationMessage("DeepSeek khả dụng, truy vấn số dư thất bại", "valid");
+        setDeepSeekAccountStatus("API khả dụng, truy vấn số dư thất bại", "valid", currentTimeLabel());
         return;
       }
       const balanceSummary = summarizeDeepSeekBalance(balance);
       setDeepSeekValidationMessage(
-        `DeepSeek 可用，${balanceSummary}`,
+        `DeepSeek khả dụng，${balanceSummary}`,
         balance.is_available ? "valid" : "error",
       );
       setDeepSeekAccountStatus(balanceSummary, balance.is_available ? "valid" : "error", currentTimeLabel());
@@ -483,13 +548,17 @@ export function mountBrowserCredentialsFeature({
       result.summary || TRANSLATION_PROVIDER_DEFINITION.validationNetworkMessage,
       "error",
     );
-    setDeepSeekAccountStatus(result.summary || "接口不可用", "error", currentTimeLabel());
+    setDeepSeekAccountStatus(result.summary || "API không khả dụng", "error", currentTimeLabel());
   }
 
   async function handleBrowserCredentialSave() {
     const definition = getOcrProviderDefinition(currentOcrProvider());
-    const { mineruInput, paddleInput, apiKeyInput } = browserCredentialElements();
-    const ocrToken = (definition.id === "paddle" ? paddleInput?.value : mineruInput?.value)?.trim() || "";
+    const { mineruInput, paddleInput, aiOcrInput, apiKeyInput } = browserCredentialElements();
+    const ocrToken = (definition.id === "paddle"
+      ? paddleInput?.value
+      : definition.id === "mineru"
+        ? mineruInput?.value
+        : aiOcrInput?.value)?.trim() || "";
     const modelApiKey = apiKeyInput?.value?.trim() || "";
     if (!ocrToken || !modelApiKey) {
       if (!ocrToken) {
@@ -527,6 +596,14 @@ export function mountBrowserCredentialsFeature({
   $("browser-paddle-token")?.addEventListener("input", () => {
     resetOcrValidationCache();
     setOcrValidationMessage("", "", "paddle");
+  });
+  $("browser-openai-token")?.addEventListener("input", () => {
+    resetOcrValidationCache();
+    $("ai_ocr_api_key").value = $("browser-openai-token")?.value || "";
+  });
+  $("browser-google-token")?.addEventListener("input", () => {
+    resetOcrValidationCache();
+    $("ai_ocr_api_key").value = $("browser-google-token")?.value || "";
   });
   $("browser-api-key")?.addEventListener("input", () => {
     setDeepSeekValidationMessage("", "");

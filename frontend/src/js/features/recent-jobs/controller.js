@@ -172,7 +172,7 @@ export function mountRecentJobsFeature({ fetchJobList, apiPrefix, startPolling }
       if (reset && collected.length === 0) {
         setRecentJobsItems([]);
         setRecentJobsHasMore(false);
-        renderRecentJobsEmpty(selectedDate ? "所选日期暂无任务" : "暂无最近任务", latestInvocationSummary);
+        renderRecentJobsEmpty(selectedDate ? "Không có tác vụ trong ngày đã chọn" : "Chưa có tác vụ gần đây", latestInvocationSummary);
         return;
       }
       if (!reset && collected.length === 0) {
@@ -203,7 +203,7 @@ export function mountRecentJobsFeature({ fetchJobList, apiPrefix, startPolling }
       if (!reset) {
         setRecentJobsHasMore(false);
       }
-      renderRecentJobsError(err.message || "读取最近任务失败", { reset });
+      renderRecentJobsError(err.message || "Đọc tác vụ gần đây thất bại", { reset });
     }
   }
 

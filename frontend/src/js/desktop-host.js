@@ -25,7 +25,7 @@ function resolveDesktopHost() {
   return {
     invoke(command, args = {}) {
       if (!invokeAdapter) {
-        throw new Error("桌面接口不可用");
+        throw new Error("API Desktop không khả dụng");
       }
       return invokeAdapter.invoke(command, args);
     },

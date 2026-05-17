@@ -9,21 +9,21 @@ class RecentJobsDialog extends HTMLElement {
         <form method="dialog" class="desktop-shell recent-jobs-dialog-shell">
           <div class="recent-jobs-sidebar-head">
             <div class="recent-jobs-head">
-              <h2>最近任务</h2>
-              <p>按最近更新时间排序，点击后直接切换到该任务。</p>
+              <h2>Tác vụ gần đây</h2>
+              <p>Sắp xếp theo thời gian cập nhật gần nhất, nhấp để chuyển thẳng đến tác vụ.</p>
             </div>
-            <button id="query-dialog-close-btn" type="submit" class="dialog-close-btn" aria-label="关闭">×</button>
+            <button id="query-dialog-close-btn" type="submit" class="dialog-close-btn" aria-label="Đóng">×</button>
           </div>
           <div class="recent-jobs-sidebar-body">
             <div class="recent-jobs-toolbar">
-              <input id="recent-jobs-date" type="date" aria-label="选择日期" />
-              <button id="refresh-jobs-btn" class="secondary" type="button">刷新列表</button>
+              <input id="recent-jobs-date" type="date" aria-label="Chọn ngày" />
+              <button id="refresh-jobs-btn" class="secondary" type="button">Làm mới danh sách</button>
             </div>
             <div id="recent-jobs-summary" class="status-panel-note">Stage Spec 0 · Legacy CLI 0 · Unknown 0</div>
-            <div id="recent-jobs-empty" class="events-empty hidden">暂无最近任务</div>
+            <div id="recent-jobs-empty" class="events-empty hidden">Chưa có tác vụ gần đây</div>
             <div id="recent-jobs-list" class="recent-jobs-list hidden"></div>
             <div class="recent-jobs-more-row">
-              <button id="load-more-jobs-btn" class="secondary hidden" type="button">更多</button>
+              <button id="load-more-jobs-btn" class="secondary hidden" type="button">Thêm</button>
             </div>
           </div>
         </form>
@@ -63,7 +63,7 @@ class RecentJobsDialog extends HTMLElement {
     }
     empty.classList.add("hidden");
     list.classList.remove("hidden");
-    list.innerHTML = '<div class="events-empty">正在加载最近任务…</div>';
+    list.innerHTML = '<div class="events-empty">Đang tải tác vụ gần đây…</div>';
     loadMoreButton.classList.add("hidden");
   }
 
@@ -76,11 +76,11 @@ class RecentJobsDialog extends HTMLElement {
     }
     list.innerHTML = "";
     list.classList.add("hidden");
-    empty.textContent = message || "暂无最近任务";
+    empty.textContent = message || "Chưa có tác vụ gần đây";
     empty.classList.remove("hidden");
     loadMoreButton.classList.add("hidden");
     loadMoreButton.disabled = false;
-    loadMoreButton.textContent = "更多";
+    loadMoreButton.textContent = "Thêm";
   }
 
   renderError(message, { reset = false } = {}) {
@@ -93,13 +93,13 @@ class RecentJobsDialog extends HTMLElement {
     if (reset) {
       list.innerHTML = "";
       list.classList.add("hidden");
-      empty.textContent = message || "读取最近任务失败";
+      empty.textContent = message || "Đọc tác vụ gần đây thất bại";
       empty.classList.remove("hidden");
     } else {
       loadMoreButton.classList.add("hidden");
     }
     loadMoreButton.disabled = false;
-    loadMoreButton.textContent = "更多";
+    loadMoreButton.textContent = "Thêm";
   }
 
   renderList(markup, { reset = false, hasMore = false, onSelect } = {}) {
@@ -114,7 +114,7 @@ class RecentJobsDialog extends HTMLElement {
     list.innerHTML = reset ? markup : `${list.innerHTML}${markup}`;
     loadMoreButton.classList.toggle("hidden", !hasMore);
     loadMoreButton.disabled = false;
-    loadMoreButton.textContent = "更多";
+    loadMoreButton.textContent = "Thêm";
     list.querySelectorAll(".recent-job-item").forEach((button) => {
       button.addEventListener("click", () => {
         onSelect?.(button.dataset.jobId || "");
@@ -128,7 +128,7 @@ class RecentJobsDialog extends HTMLElement {
       return;
     }
     loadMoreButton.disabled = true;
-    loadMoreButton.textContent = "加载中…";
+    loadMoreButton.textContent = "Đang tải…";
   }
 }
 

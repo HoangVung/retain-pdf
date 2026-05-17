@@ -160,6 +160,7 @@ class TranslateStageParams:
     skip_title_translation: bool
     classify_batch_size: int
     rule_profile_name: str
+    target_language_name: str
     custom_rules_text: str
     glossary_id: str
     glossary_name: str
@@ -224,6 +225,7 @@ class TranslateStageSpec:
             skip_title_translation=bool(params_payload.get("skip_title_translation", False)),
             classify_batch_size=int(params_payload.get("classify_batch_size", 12) or 12),
             rule_profile_name=str(params_payload.get("rule_profile_name", "general_sci") or "general_sci"),
+            target_language_name=str(params_payload.get("target_language_name", "Tiếng Việt") or "Tiếng Việt"),
             custom_rules_text=str(params_payload.get("custom_rules_text", "") or ""),
             glossary_id=str(params_payload.get("glossary_id", "") or ""),
             glossary_name=str(params_payload.get("glossary_name", "") or ""),
@@ -383,6 +385,7 @@ class ProviderStageTranslationParams:
     skip_title_translation: bool
     classify_batch_size: int
     rule_profile_name: str
+    target_language_name: str
     custom_rules_text: str
     glossary_id: str
     glossary_name: str
@@ -478,6 +481,7 @@ class ProviderStageSpec:
             skip_title_translation=bool(translation_payload.get("skip_title_translation", False)),
             classify_batch_size=int(translation_payload.get("classify_batch_size", 12) or 12),
             rule_profile_name=str(translation_payload.get("rule_profile_name", "general_sci") or "general_sci"),
+            target_language_name=str(translation_payload.get("target_language_name", "Tiếng Việt") or "Tiếng Việt"),
             custom_rules_text=str(translation_payload.get("custom_rules_text", "") or ""),
             glossary_id=str(translation_payload.get("glossary_id", "") or ""),
             glossary_name=str(translation_payload.get("glossary_name", "") or ""),
@@ -536,6 +540,7 @@ class BookStageTranslationParams:
     skip_title_translation: bool
     classify_batch_size: int
     rule_profile_name: str
+    target_language_name: str
     custom_rules_text: str
     glossary_id: str
     glossary_name: str
@@ -615,6 +620,7 @@ class BookStageSpec:
             skip_title_translation=bool(translation_payload.get("skip_title_translation", False)),
             classify_batch_size=int(translation_payload.get("classify_batch_size", 12) or 12),
             rule_profile_name=str(translation_payload.get("rule_profile_name", "general_sci") or "general_sci"),
+            target_language_name=str(translation_payload.get("target_language_name", "Tiếng Việt") or "Tiếng Việt"),
             custom_rules_text=str(translation_payload.get("custom_rules_text", "") or ""),
             glossary_id=str(translation_payload.get("glossary_id", "") or ""),
             glossary_name=str(translation_payload.get("glossary_name", "") or ""),

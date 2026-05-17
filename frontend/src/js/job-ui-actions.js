@@ -103,13 +103,13 @@ export function setUploadProgress(loaded, total) {
     if (fill) {
       fill.style.width = `${percent}%`;
     }
-    $("upload-progress-text").textContent = `上传中 ${percent.toFixed(0)}%`;
+    $("upload-progress-text").textContent = `Đang tải lên ${percent.toFixed(0)}%`;
     return;
   }
   if (fill) {
     fill.style.width = "18%";
   }
-  $("upload-progress-text").textContent = "上传中";
+  $("upload-progress-text").textContent = "Đang tải lên";
 }
 
 export function resetUploadProgress() {
@@ -120,7 +120,7 @@ export function resetUploadProgress() {
   if (fill) {
     fill.style.width = "0%";
   }
-  $("upload-progress-text").textContent = "上传中";
+  $("upload-progress-text").textContent = "Đang tải lên";
 }
 
 export function clearFileInputValue() {
@@ -141,7 +141,7 @@ export function resetUploadedFile() {
   $("submit-btn").disabled = true;
   $("upload-action-slot")?.classList.add("hidden");
   $("file")?.closest(".upload-tile")?.classList.remove("is-ready");
-  $("upload-status").textContent = "未上传文件";
+  $("upload-status").textContent = "Chưa tải lên tệp";
   $("upload-status")?.classList.add("hidden");
   $("file-label").textContent = DEFAULT_FILE_LABEL;
   $("file-label").title = "";

@@ -13,7 +13,7 @@ LEGACY_JSON_ONLY_INSTRUCTION_ZH = (
     "返回结果时只输出符合以下结构的合法 JSON：\n"
     '{"translations":[{"item_id":"...","translated_text":"..."}]}'
 )
-DEFAULT_TARGET_LANGUAGE_NAME = "简体中文"
+DEFAULT_TARGET_LANGUAGE_NAME = "Tiếng Việt"
 
 
 def _target_language_name(value: str = "") -> str:

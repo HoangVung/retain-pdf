@@ -13,15 +13,15 @@ class JobStatusCard extends HTMLElement {
 
       <div class="status-ring-shell">
         <div class="status-focus-card">
-          <div id="status-stage-flow" class="status-stage-flow" aria-label="任务流程">
+          <div id="status-stage-flow" class="status-stage-flow" aria-label="Quy trình tác vụ">
             <span class="status-stage-step" data-stage-key="ocr">OCR</span>
-            <span class="status-stage-step" data-stage-key="translate">翻译</span>
-            <span class="status-stage-step" data-stage-key="render">渲染</span>
-            <span class="status-stage-step" data-stage-key="done">完成</span>
+            <span class="status-stage-step" data-stage-key="translate">Dịch</span>
+            <span class="status-stage-step" data-stage-key="render">Kết xuất</span>
+            <span class="status-stage-step" data-stage-key="done">Hoàn thành</span>
           </div>
-          <div id="status-ring-label" class="status-ring-label">等待中</div>
-          <div id="status-ring-value" class="status-ring-value">准备中</div>
-          <div id="status-ring-elapsed" class="status-ring-elapsed">0秒</div>
+          <div id="status-ring-label" class="status-ring-label">Đang đợi</div>
+          <div id="status-ring-value" class="status-ring-value">Đang chuẩn bị</div>
+          <div id="status-ring-elapsed" class="status-ring-elapsed">0 giây</div>
           <div class="status-progress-block">
             <div class="progress-track"><div id="job-progress-bar" class="progress-bar"></div></div>
             <div id="job-progress-text" class="status-progress-text">-</div>
@@ -45,7 +45,7 @@ class JobStatusCard extends HTMLElement {
     `;
   }
 
-  setStagePresentation({ label = "等待中", value = "准备中", stageKey = "" } = {}) {
+  setStagePresentation({ label = "Đang đợi", value = "Đang chuẩn bị", stageKey = "" } = {}) {
     const labelEl = this.querySelector("#status-ring-label");
     const valueEl = this.querySelector("#status-ring-value");
     this.setStageFlow(stageKey);
@@ -120,8 +120,8 @@ class JobStatusCard extends HTMLElement {
   }
 
   renderSnapshot({
-    label = "等待中",
-    value = "准备中",
+    label = "Đang đợi",
+    value = "Đang chuẩn bị",
     stageKey = "",
     elapsed = "-",
     progressCurrent = NaN,

@@ -2,7 +2,7 @@ const MOCK_JOB_ID = "mock-job-20260415";
 const MOCK_MARKDOWN_CONTENT = [
   "# Mock Markdown",
   "",
-  "这是一段用于前端联调的 Markdown 预览。",
+  "Đây là một đoạn xem trước Markdown dùng để kiểm thử frontend.",
   "",
   '<div style="text-align: center;"><img src="page-1/imgs/mock-figure-1.png" alt="Mock Image" width="48%" /></div>',
 ].join("\n");
@@ -19,10 +19,10 @@ function isoOffsetMinutes(minutes) {
 function buildMockJobPayload(scenario = currentMockScenario()) {
   const normalized = scenario || "running";
   const progressMap = {
-    queued: { current: 0, total: 100, percent: 0, stage: "排队中" },
-    running: { current: 62, total: 100, percent: 62, stage: "正在翻译正文与公式" },
-    succeeded: { current: 100, total: 100, percent: 100, stage: "处理完成" },
-    failed: { current: 78, total: 100, percent: 78, stage: "渲染阶段失败" },
+    queued: { current: 0, total: 100, percent: 0, stage: "Đang xếp hàng" },
+    running: { current: 62, total: 100, percent: 62, stage: "Đang dịch nội dung chính và công thức" },
+    succeeded: { current: 100, total: 100, percent: 100, stage: "Xử lý hoàn thành" },
+    failed: { current: 78, total: 100, percent: 78, stage: "Kết xuấtGiai đoạnThất bại" },
   };
   const progress = progressMap[normalized];
   const status = normalized;
@@ -50,7 +50,7 @@ function buildMockJobPayload(scenario = currentMockScenario()) {
       active_stage_elapsed_ms: status === "queued" ? 42_000 : 214_000,
       total_elapsed_ms: status === "queued" ? 42_000 : 536_000,
       retry_count: status === "failed" ? 1 : 0,
-      terminal_reason: status === "failed" ? "渲染器退出码非零" : status === "succeeded" ? "completed" : "",
+      terminal_reason: status === "failed" ? "Trình kết xuất trả về mã thoát khác 0" : status === "succeeded" ? "completed" : "",
     },
     invocation: {
       input_protocol: "stage_spec",
@@ -112,11 +112,11 @@ function buildMockJobPayload(scenario = currentMockScenario()) {
     },
     failure: status === "failed"
       ? {
-          summary: "任务失败，但这是前端 mock 场景。",
+          summary: "Tác vụ thất bại, đây là tình huống mock của frontend.",
           category: "mock_render_failure",
           stage: "render",
-          root_cause: "用于 UI 调试的模拟失败。",
-          suggestion: "切换 ?mock=succeeded 查看成功态。",
+          root_cause: "Lỗi mô phỏng dùng để gỡ lỗi UI.",
+          suggestion: "Chuyển sang ?mock=succeeded để xem trạng thái thành công.",
           retryable: true,
         }
       : null,
@@ -144,7 +144,7 @@ function buildMockEvents(scenario = currentMockScenario()) {
       timestamp: isoOffsetMinutes(-10),
       level: "info",
       stage: "queued",
-      title: "任务已进入队列",
+      title: "Tác vụ đã vào hàng đợi",
       payload: { scenario },
     },
   ];
@@ -153,7 +153,7 @@ function buildMockEvents(scenario = currentMockScenario()) {
       timestamp: isoOffsetMinutes(-8),
       level: "info",
       stage: "translate",
-      title: "翻译阶段已开始",
+      title: "Giai đoạn dịch đã bắt đầu",
       payload: { progress_percent: scenario === "running" ? 62 : 100 },
     });
   }
@@ -162,7 +162,7 @@ function buildMockEvents(scenario = currentMockScenario()) {
       timestamp: isoOffsetMinutes(-1),
       level: "info",
       stage: "render",
-      title: "PDF 已生成",
+      title: "PDF đã được tạo",
       payload: { artifact_key: "pdf" },
     });
   }
@@ -171,7 +171,7 @@ function buildMockEvents(scenario = currentMockScenario()) {
       timestamp: isoOffsetMinutes(-1),
       level: "error",
       stage: "render",
-      title: "渲染失败",
+      title: "Kết xuấtThất bại",
       payload: { message: "mock render failure" },
     });
   }
@@ -234,7 +234,7 @@ export function getMockJobId() {
 
 export function getMockJobPayload(jobId = "") {
   if (jobId && jobId !== MOCK_JOB_ID) {
-    throw new Error("未找到该 mock 任务，请检查 job_id 是否正确。");
+    throw new Error("Không tìm thấy tác vụ mock này, vui lòng kiểm tra job_id có đúng không.");
   }
   return buildMockJobPayload();
 }

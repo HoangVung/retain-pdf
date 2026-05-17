@@ -10,6 +10,7 @@ export function mountWorkflowFeature({
   defaultModelBaseUrl,
   defaultMineruToken,
   defaultPaddleToken,
+  defaultAiOcrApiKey,
   defaultOcrProvider,
   defaultModelApiKey,
   normalizeWorkflow,
@@ -27,6 +28,7 @@ export function mountWorkflowFeature({
     DEFAULT_TIMEOUT_SECONDS,
     DEFAULT_MODEL_VERSION,
     DEFAULT_LANGUAGE,
+    DEFAULT_TARGET_LANGUAGE_NAME,
     DEFAULT_MODE,
     DEFAULT_RULE_PROFILE,
     DEFAULT_RENDER_MODE,
@@ -45,6 +47,7 @@ export function mountWorkflowFeature({
       workflow: normalizeWorkflow(saved.workflow),
       renderSourceJobId: `${saved.renderSourceJobId || ""}`.trim(),
       mathMode: normalizeMathMode(saved.mathMode),
+      translationProvider: `${saved.translationProvider || "deepseek"}`.trim(),
       model: saved.model || defaultModelName(),
       baseUrl: saved.baseUrl || defaultModelBaseUrl(),
       workers: Number(saved.workers || DEFAULT_WORKERS),
@@ -52,6 +55,7 @@ export function mountWorkflowFeature({
       classifyBatchSize: Number(saved.classifyBatchSize || DEFAULT_CLASSIFY_BATCH_SIZE),
       compileWorkers: Number(saved.compileWorkers || DEFAULT_COMPILE_WORKERS),
       timeoutSeconds: Number(saved.timeoutSeconds || DEFAULT_TIMEOUT_SECONDS),
+      targetLanguageName: `${saved.targetLanguageName || DEFAULT_TARGET_LANGUAGE_NAME}`.trim() || DEFAULT_TARGET_LANGUAGE_NAME,
       translateTitles: saved.translateTitles !== false,
     };
   }
@@ -93,24 +97,24 @@ export function mountWorkflowFeature({
   function workflowSubmitLabel(workflow = currentWorkflow()) {
     switch (workflow) {
       case WORKFLOW_RENDER:
-        return "开始渲染";
+        return "Bắt đầu kết xuất";
       case WORKFLOW_TRANSLATE:
-        return "开始翻译";
+        return "Bắt đầu dịch";
       case WORKFLOW_BOOK:
-        return hasAppliedPageRange() ? "开始翻译" : "全书翻译";
+        return hasAppliedPageRange() ? "Bắt đầu dịch" : "Dịch toàn bộ";
       default:
-        return hasAppliedPageRange() ? "开始翻译" : "全书翻译";
+        return hasAppliedPageRange() ? "Bắt đầu dịch" : "Dịch toàn bộ";
     }
   }
 
   function workflowHeadline(workflow = currentWorkflow()) {
     switch (workflow) {
       case WORKFLOW_RENDER:
-        return "当前工作流会复用已有任务产物重新生成 PDF。";
+        return "Quy trình hiện tại sẽ dùng lại kết quả tác vụ đã có để tạo lại PDF.";
       case WORKFLOW_TRANSLATE:
-        return "上传后会执行 OCR 与正文翻译，不进入 PDF 渲染。";
+        return "Sau khi tải lên sẽ chạy OCR và dịch nội dung chính, không kết xuất PDF.";
       default:
-        return "上传后会执行 OCR、翻译与 PDF 渲染。";
+        return "Sau khi tải lên sẽ chạy OCR, dịch và kết xuất PDF.";
     }
   }
 
@@ -121,10 +125,10 @@ export function mountWorkflowFeature({
     renderWrap?.classList.toggle("hidden", workflow !== WORKFLOW_RENDER);
     if (note) {
       note.textContent = workflow === WORKFLOW_RENDER
-        ? "render 会跳过 OCR 与翻译，直接复用已有任务产物重新渲染 PDF。"
+        ? "render sẽ bỏ qua OCR và dịch, dùng lại kết quả tác vụ đã có để kết xuất lại PDF."
         : workflow === WORKFLOW_TRANSLATE
-          ? "translate 会执行 OCR 与翻译，但不会进入最终 PDF 渲染。"
-          : "book 会完整执行 OCR、翻译与 PDF 渲染。";
+          ? "translate sẽ chạy OCR và dịch, nhưng không kết xuất PDF cuối cùng."
+          : "book sẽ chạy đầy đủ OCR, dịch và kết xuất PDF.";
     }
   }
 
@@ -181,16 +185,16 @@ export function mountWorkflowFeature({
       uploadGlyph?.classList.add("hidden");
       uploadMeta?.classList.add("hidden");
       if (fileLabel) {
-        fileLabel.textContent = "Mock 模式";
+        fileLabel.textContent = "Chế độ mô phỏng";
         fileLabel.title = "";
         fileLabel.classList.remove("hidden");
       }
       if (uploadHelp) {
-        uploadHelp.textContent = `当前为 mock 模式：${new URLSearchParams(window.location.search).get("mock") || "running"}。不会上传文件，也不会请求真实后端。`;
+        uploadHelp.textContent = `Hiện ở chế độ mô phỏng: ${new URLSearchParams(window.location.search).get("mock") || "running"}。Không tải tệp lên và không gọi backend thật.`;
         uploadHelp.classList.remove("hidden");
       }
       if (uploadStatus) {
-        uploadStatus.textContent = "Mock 模式已启用，可直接点击开始翻译。";
+        uploadStatus.textContent = "Chế độ mô phỏng đã bật, có thể bấm bắt đầu dịch ngay.";
         uploadStatus.classList.remove("hidden");
       }
       renderPageRangeSummary();
@@ -205,7 +209,7 @@ export function mountWorkflowFeature({
     uploadGlyph?.classList.toggle("hidden", !needsUpload);
     uploadMeta?.classList.toggle("hidden", !needsUpload);
     if (fileLabel && !state.uploadId) {
-      fileLabel.textContent = needsUpload ? DEFAULT_FILE_LABEL : "复用已有任务产物";
+      fileLabel.textContent = needsUpload ? DEFAULT_FILE_LABEL : "Dùng lại kết quả tác vụ đã có";
       fileLabel.title = "";
       fileLabel.classList.remove("hidden");
     }
@@ -216,8 +220,8 @@ export function mountWorkflowFeature({
     if (!needsUpload && uploadStatus) {
       const renderSourceJobId = currentRenderSourceJobId();
       uploadStatus.textContent = renderSourceJobId
-        ? `当前将复用任务: ${renderSourceJobId}`
-        : "请先在开发者设置里填写 Render 源任务 ID。";
+        ? `Tác vụ dùng lại hiện tại: ${renderSourceJobId}`
+        : "Vui lòng điền ID tác vụ nguồn để kết xuất trong Cài đặt nhà phát triển.";
       uploadStatus.classList.remove("hidden");
     } else if (!state.uploadId) {
       uploadStatus?.classList.add("hidden");
@@ -233,6 +237,7 @@ export function mountWorkflowFeature({
       workflow: normalizeWorkflow($("developer-workflow")?.value),
       renderSourceJobId: $("developer-render-source-job-id")?.value?.trim() || "",
       mathMode: currentConfig.mathMode,
+      translationProvider: currentConfig.translationProvider,
       model: $("developer-model")?.value?.trim() || defaultModelName(),
       baseUrl: $("developer-base-url")?.value?.trim() || defaultModelBaseUrl(),
       workers: Number($("developer-workers")?.value || DEFAULT_WORKERS),
@@ -240,6 +245,7 @@ export function mountWorkflowFeature({
       classifyBatchSize: Number($("developer-classify-batch-size")?.value || DEFAULT_CLASSIFY_BATCH_SIZE),
       compileWorkers: Number($("developer-compile-workers")?.value || DEFAULT_COMPILE_WORKERS),
       timeoutSeconds: Number($("developer-timeout-seconds")?.value || DEFAULT_TIMEOUT_SECONDS),
+      targetLanguageName: currentConfig.targetLanguageName,
       translateTitles: currentConfig.translateTitles,
     };
     void saveDeveloperStoredConfig(state.developerConfig);
@@ -265,10 +271,16 @@ export function mountWorkflowFeature({
     const definition = getOcrProviderDefinition(provider);
     const token = definition.id === "paddle"
       ? ($("paddle_token")?.value || defaultPaddleToken())
-      : ($("mineru_token")?.value || defaultMineruToken());
+      : definition.id === "mineru"
+        ? ($("mineru_token")?.value || defaultMineruToken())
+        : ($("ai_ocr_api_key")?.value || defaultAiOcrApiKey());
     return {
       provider,
       [definition.tokenField]: token,
+      ai_ocr_model: definition.id === "google" ? "gemini-2.5-flash" : "gpt-4.1-mini",
+      ai_ocr_base_url: definition.id === "google"
+        ? "https://generativelanguage.googleapis.com/v1beta/openai"
+        : "https://api.openai.com/v1",
       model_version: DEFAULT_MODEL_VERSION,
       language: DEFAULT_LANGUAGE,
       page_ranges: pageRanges,
@@ -286,6 +298,7 @@ export function mountWorkflowFeature({
       batch_size: developerConfig.batchSize,
       classify_batch_size: developerConfig.classifyBatchSize,
       rule_profile_name: DEFAULT_RULE_PROFILE,
+      target_language_name: developerConfig.targetLanguageName,
       custom_rules_text: "",
       glossary_id: "",
       glossary_entries: [],

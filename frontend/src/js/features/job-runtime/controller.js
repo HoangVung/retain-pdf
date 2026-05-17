@@ -181,7 +181,7 @@ export function mountJobRuntimeFeature({
     setText("failure-suggestion", "-");
     setText("failure-last-log-line", "-");
     setText("failure-retryable", "-");
-    setText("events-status", "全部事件");
+    setText("events-status", "Tất cảSự kiện");
     $("events-empty")?.classList.remove("hidden");
     $("events-list")?.classList.add("hidden");
     if ($("events-list")) {
@@ -194,7 +194,7 @@ export function mountJobRuntimeFeature({
   async function cancelCurrentJob() {
     const jobId = state.currentJobId;
     if (!jobId) {
-      setText("error-box", "当前没有可取消的任务");
+      setText("error-box", "Hiện không có tác vụ nào có thể hủy");
       return;
     }
     $("cancel-btn").disabled = true;

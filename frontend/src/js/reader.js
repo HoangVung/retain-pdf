@@ -43,13 +43,13 @@ const bootProgressBarState = {
   rafId: 0,
 };
 const progressCopy = {
-  boot: "正在准备对照阅读…",
-  metadata: "正在读取任务信息…",
-  both: "正在加载原始 PDF 和译文 PDF…",
-  sourceOnly: "原始 PDF 已加载，正在加载译文 PDF…",
-  translatedOnly: "译文 PDF 已加载，正在加载原始 PDF…",
-  ready: "对照阅读已就绪",
-  failed: "对照阅读加载失败",
+  boot: "Đang chuẩn bị đọc đối chiếu…",
+  metadata: "Đang đọc thông tin tác vụ…",
+  both: "Đang tải PDF gốc và PDF bản dịch…",
+  sourceOnly: "PDF gốc đã tải, đang tải PDF bản dịch…",
+  translatedOnly: "PDF bản dịch đã tải, đang tải PDF gốc…",
+  ready: "Đọc đối chiếu đã sẵn sàng",
+  failed: "Tải đọc đối chiếu thất bại",
 };
 
 function setReaderBootLoading(loading) {
@@ -186,7 +186,7 @@ function setPageIndicator(currentPage, totalPages) {
     indicator?.classList.add("hidden");
     return;
   }
-  indicator.textContent = `第 ${currentPage} / ${totalPages} 页`;
+  indicator.textContent = `Trang ${currentPage} / ${totalPages}`;
   indicator.classList.remove("hidden");
 }
 
@@ -272,7 +272,7 @@ async function loadPdfDocument(itemOrUrl, label) {
   }
   const resp = await fetchProtected(url);
   if (!resp.ok) {
-    throw new Error(`读取${label}失败。(${resp.status})`);
+    throw new Error(`Đọc ${label} thất bại. (${resp.status})`);
   }
   const buffer = await resp.arrayBuffer();
   return pdfjsLib.getDocument({
@@ -349,11 +349,11 @@ async function initializeReader() {
     const translatedPdfUrl = resolveTranslatedPdfUrl(jobPayload, manifestPayload);
 
     const [sourceResult, translatedResult] = await Promise.allSettled([
-      mountPdfViewer("reader-pdf", sourcePdf, "原始 PDF", "reader-pdf-empty").finally(() => {
+      mountPdfViewer("reader-pdf", sourcePdf, "PDF gốc", "reader-pdf-empty").finally(() => {
         progressState.sourceDone = true;
         syncReaderBootProgress();
       }),
-      mountPdfViewer("reader-translated-pdf", translatedPdfUrl, "译文 PDF", "reader-translation-empty").finally(() => {
+      mountPdfViewer("reader-translated-pdf", translatedPdfUrl, "PDF bản dịch", "reader-translation-empty").finally(() => {
         progressState.translatedDone = true;
         syncReaderBootProgress();
       }),

@@ -41,10 +41,10 @@ function summarizeJobRequestContext(payload) {
 
 function assertGroupedJobPayload(payload) {
   if (!isObject(payload)) {
-    throw new Error("提交失败: /api/v1/jobs 需要 JSON object 请求体。");
+    throw new Error("Gửi thất bại: /api/v1/jobs cần request body dạng JSON object。");
   }
   if (!payload.workflow || !isObject(payload.source)) {
-    throw new Error("提交失败: /api/v1/jobs 必须使用 grouped JSON，至少包含 workflow 和 source。");
+    throw new Error("Gửi thất bại: /api/v1/jobs phải dùng grouped JSON, tối thiểu có workflow và source。");
   }
   const legacyTopLevelFields = [
     "upload_id",
@@ -53,6 +53,7 @@ function assertGroupedJobPayload(payload) {
     "model",
     "base_url",
     "api_key",
+    "ai_ocr_api_key",
     "mineru_token",
     "paddle_token",
     "model_version",
@@ -70,7 +71,7 @@ function assertGroupedJobPayload(payload) {
   const leakedLegacyFields = legacyTopLevelFields.filter((field) => field in payload);
   if (leakedLegacyFields.length > 0) {
     throw new Error(
-      `提交失败: /api/v1/jobs 不再接受旧扁平字段，发现 ${leakedLegacyFields.join(", ")}。请改为 source/ocr/translation/render/runtime 分组结构。`,
+      `Gửi thất bại: /api/v1/jobs không còn nhận các trường phẳng cũ, phát hiện ${leakedLegacyFields.join(", ")}。vui lòng đổi sang cấu trúc nhóm source/ocr/translation/render/runtime。`,
     );
   }
 }
@@ -102,9 +103,9 @@ export async function fetchJobPayload(jobId, apiPrefix) {
   });
   if (!resp.ok) {
     if (resp.status === 404) {
-      throw new Error("未找到该任务，请检查 job_id 是否正确。");
+      throw new Error("Không tìm thấy tác vụ này, vui lòng kiểm tra job_id có đúng không.");
     }
-    throw new Error(`读取任务失败，请稍后重试。(${resp.status})`);
+    throw new Error(`Đọc tác vụ thất bại, vui lòng thử lại sau.(${resp.status})`);
   }
   const payloadJson = await resp.json();
   return unwrapEnvelope(payloadJson);
@@ -124,7 +125,7 @@ export async function fetchJobEvents(jobId, apiPrefix, limit = 50, offset = 0) {
     if (resp.status === 404) {
       return { items: [], limit, offset };
     }
-    throw new Error(`读取事件流失败，请稍后重试。(${resp.status})`);
+    throw new Error(`Đọc luồng sự kiện thất bại, vui lòng thử lại sau.(${resp.status})`);
   }
   const payloadJson = await resp.json();
   return unwrapEnvelope(payloadJson);
@@ -143,7 +144,7 @@ export async function fetchJobArtifactsManifest(jobId, apiPrefix) {
     if (resp.status === 404) {
       return { items: [] };
     }
-    throw new Error(`读取产物清单失败，请稍后重试。(${resp.status})`);
+    throw new Error(`Đọc danh sách kết quả thất bại, vui lòng thử lại sau.(${resp.status})`);
   }
   const payloadJson = await resp.json();
   return unwrapEnvelope(payloadJson);
@@ -162,7 +163,7 @@ export async function fetchJobMarkdown(jobId, apiPrefix) {
     if (resp.status === 404) {
       return null;
     }
-    throw new Error(`读取 Markdown 失败，请稍后重试。(${resp.status})`);
+    throw new Error(`Đọc Markdown thất bại, vui lòng thử lại sau.(${resp.status})`);
   }
   const payloadJson = await resp.json();
   return unwrapEnvelope(payloadJson);
@@ -184,9 +185,9 @@ export async function fetchTranslationDiagnostics(jobId, apiPrefix) {
   });
   if (!resp.ok) {
     if (resp.status === 404) {
-      throw new Error("未找到翻译调试信息，请确认该任务已完成翻译。");
+      throw new Error("Không tìm thấy thông tin gỡ lỗi dịch thuật, vui lòng xác nhận tác vụ đã hoàn thành dịch.");
     }
-    throw new Error(`读取翻译调试摘要失败，请稍后重试。(${resp.status})`);
+    throw new Error(`Đọc tóm tắt gỡ lỗi dịch thuật thất bại, vui lòng thử lại sau.(${resp.status})`);
   }
   const payloadJson = await resp.json();
   return unwrapEnvelope(payloadJson);
@@ -241,7 +242,7 @@ export async function fetchTranslationItems(
     if (resp.status === 404) {
       return { items: [], total: 0, limit, offset };
     }
-    throw new Error(`读取翻译调试列表失败，请稍后重试。(${resp.status})`);
+    throw new Error(`Đọc danh sách gỡ lỗi dịch thuật thất bại, vui lòng thử lại sau.(${resp.status})`);
   }
   const payloadJson = await resp.json();
   return unwrapEnvelope(payloadJson);
@@ -263,9 +264,9 @@ export async function fetchTranslationItem(jobId, itemId, apiPrefix) {
   });
   if (!resp.ok) {
     if (resp.status === 404) {
-      throw new Error("未找到该翻译 item，请确认 item_id 是否正确。");
+      throw new Error("Không tìm thấy item dịch này, vui lòng xác nhận item_id có đúng không.");
     }
-    throw new Error(`读取翻译 item 详情失败，请稍后重试。(${resp.status})`);
+    throw new Error(`Đọc chi tiết item dịch thất bại, vui lòng thử lại sau.(${resp.status})`);
   }
   const payloadJson = await resp.json();
   return unwrapEnvelope(payloadJson);
@@ -294,14 +295,14 @@ export async function replayTranslationItem(jobId, itemId, apiPrefix) {
   if (!resp.ok) {
     const contentType = resp.headers.get("content-type") || "";
     if (resp.status === 404) {
-      throw new Error("未找到该翻译 item，无法重放。");
+      throw new Error("Không tìm thấy item dịch này, không thể phát lại.");
     }
     if (contentType.includes("application/json")) {
       const errorPayload = await resp.json();
-      throw new Error(`重放翻译 item 失败: ${errorPayload.message || JSON.stringify(errorPayload)}`);
+      throw new Error(`Phát lại item dịch thất bại: ${errorPayload.message || JSON.stringify(errorPayload)}`);
     }
     const text = await resp.text();
-    throw new Error(`重放翻译 item 失败: ${resp.status} ${text}`);
+    throw new Error(`Phát lại item dịch thất bại: ${resp.status} ${text}`);
   }
   const payloadJson = await resp.json();
   return unwrapEnvelope(payloadJson);
@@ -349,7 +350,7 @@ export async function fetchJobList(
     headers: buildApiHeaders(),
   });
   if (!resp.ok) {
-    throw new Error(`读取最近任务失败，请稍后重试。(${resp.status})`);
+    throw new Error(`Đọc tác vụ gần đây thất bại, vui lòng thử lại sau.(${resp.status})`);
   }
   const payloadJson = await resp.json();
   return unwrapEnvelope(payloadJson);
@@ -390,11 +391,11 @@ export function submitUploadRequest(url, form, onProgress) {
       const message = typeof xhr.response === "object" && xhr.response
         ? (xhr.response.message || JSON.stringify(xhr.response))
         : (xhr.responseText || "");
-      reject(new Error(`提交失败: ${xhr.status} ${message}`));
+      reject(new Error(`Gửi thất bại: ${xhr.status} ${message}`));
     });
 
     xhr.addEventListener("error", () => {
-      reject(new Error(`提交失败: 网络错误。当前 API Base 为 ${apiBase()}，上传地址为 ${url}。请确认本地服务已经启动。`));
+      reject(new Error(`Gửi thất bại: Lỗi mạng. API Base hiện tại là ${apiBase()}，địa chỉ tải lên là ${url}。vui lòng xác nhận dịch vụ cục bộ đã khởi động.`));
     });
 
     xhr.send(form);
@@ -425,10 +426,10 @@ export async function submitJson(url, payload) {
     const contentType = resp.headers.get("content-type") || "";
     if (contentType.includes("application/json")) {
       const errorPayload = await resp.json();
-      throw new Error(`提交失败: ${resp.status} ${errorPayload.message || JSON.stringify(errorPayload)}${requestContext}`);
+      throw new Error(`Gửi thất bại: ${resp.status} ${errorPayload.message || JSON.stringify(errorPayload)}${requestContext}`);
     }
     const text = await resp.text();
-    throw new Error(`提交失败: ${resp.status} ${text}${requestContext}`);
+    throw new Error(`Gửi thất bại: ${resp.status} ${text}${requestContext}`);
   }
   if (resp.status === 204) {
     return { ok: true };
@@ -490,7 +491,7 @@ export async function queryDeepSeekBalance(apiPrefix, payload) {
     return {
       ok: true,
       status: "available",
-      summary: "mock mode: DeepSeek 余额可用：CNY 100.00",
+      summary: "mock mode: DeepSeek Số dư khả dụng：CNY 100.00",
       is_available: true,
       balance_infos: [
         {

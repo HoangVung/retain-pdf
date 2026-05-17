@@ -37,6 +37,7 @@ def translate_book_pipeline(
     base_url: str = DEFAULT_BASE_URL,
     source_pdf_path: Path | None = None,
     rule_profile_name: str = "general_sci",
+    target_language_name: str = "Tiếng Việt",
     custom_rules_text: str = "",
     glossary_id: str = "",
     glossary_name: str = "",
@@ -74,6 +75,7 @@ def translate_book_pipeline(
     print(f"rule profile: {policy_config.rule_profile_name}", flush=True)
     translation_context = build_translation_context_from_policy(
         policy_config,
+        target_language_name=target_language_name,
         glossary_entries=glossary_entries or [],
         model=model,
         base_url=base_url,

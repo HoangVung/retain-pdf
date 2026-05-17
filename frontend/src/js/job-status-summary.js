@@ -19,20 +19,20 @@ function stageKeyOf(payload) {
 const USER_STAGE_FLOW = [
   {
     key: "ocr",
-    label: "OCR 解析",
-    detail: "正在识别 PDF 内容",
+    label: "OCR Phân tích",
+    detail: "Đang nhận dạng nội dung PDF",
     matches: ["ocr", "parse", "mineru", "paddle", "normaliz", "document"],
   },
   {
     key: "translate",
-    label: "翻译",
-    detail: "正在翻译正文内容",
+    label: "Dịch",
+    detail: "Đang dịch nội dung chính",
     matches: ["translat"],
   },
   {
     key: "render",
-    label: "渲染",
-    detail: "正在生成翻译后的 PDF",
+    label: "Kết xuất",
+    detail: "Đang tạo PDF đã dịch",
     matches: ["render", "sav"],
   },
 ];
@@ -41,40 +41,40 @@ const USER_STAGE_TOTAL = USER_STAGE_FLOW.length + 1;
 
 const DETAIL_TEXT_MAP = [
   {
-    matches: ["queue", "queued", "pending", "执行槽位", "排队"],
-    detail: "排队中，等待可用执行槽位",
+    matches: ["queue", "queued", "pending", "slot", "Xếp hàng"],
+    detail: "Đang xếp hàng, chờ luồng xử lý khả dụng",
   },
   {
-    matches: ["启动 ocr", "ocr 子任务", "ocr job"],
-    detail: "正在启动 OCR 子任务",
+    matches: ["Khởi động OCR", "ocr job"],
+    detail: "Đang khởi động tác vụ con OCR",
   },
   {
-    matches: ["normaliz", "标准化", "standard", "document"],
-    detail: "正在整理 OCR 结果",
+    matches: ["normaliz", "Chuẩn hóa", "standard", "document"],
+    detail: "Đang sắp xếp kết quả OCR",
   },
   {
-    matches: ["continuation_review", "跨栏", "跨页", "连续段"],
-    detail: "正在判断跨栏/跨页连续段",
+    matches: ["continuation_review", "Vượt cột", "Vượt trang", "Đoạn liên tục"],
+    detail: "Đang kiểm tra đoạn liên tục vượt cột hoặc vượt trang",
   },
   {
-    matches: ["page_policies", "页面策略", "块分类", "分类"],
-    detail: "正在判断正文与保留排版内容",
+    matches: ["page_policies", "Chiến lược trang", "Phân loại"],
+    detail: "Đang xác định văn bản chính và nội dung giữ định dạng",
   },
   {
-    matches: ["garbled", "乱码"],
-    detail: "正在修复乱码候选段",
+    matches: ["garbled", "Ký tự rác"],
+    detail: "Đang sửa các đoạn có ký tự rác",
   },
   {
-    matches: ["翻译完成", "开始渲染", "render", "渲染", "生成 pdf"],
-    detail: "正在生成翻译后的 PDF",
+    matches: ["DịchHoàn thành", "Kết xuất", "render", "Tạo PDF"],
+    detail: "Đang tạo PDF đã dịch",
   },
   {
-    matches: ["ocr 完成", "开始翻译", "translat", "翻译"],
-    detail: "正在翻译正文内容",
+    matches: ["ocr Hoàn thành", "Dịch", "translat"],
+    detail: "Đang dịch nội dung chính",
   },
   {
-    matches: ["sav", "保存"],
-    detail: "正在保存结果文件",
+    matches: ["sav", "Lưu"],
+    detail: "Đang lưu tệp kết quả",
   },
 ];
 
@@ -95,26 +95,26 @@ function detailForPayload(payload, fallback) {
 }
 
 function userStageFlowIndex(text) {
-  if (["render", "渲染", "生成 pdf", "sav", "保存"].some((keyword) => text.includes(keyword))) {
+  if (["render", "Kết xuất", "Tạo PDF", "sav", "Lưu"].some((keyword) => text.includes(keyword))) {
     return USER_STAGE_FLOW.findIndex((stage) => stage.key === "render");
   }
   if ([
     "translat",
-    "开始翻译",
-    "翻译",
+    "Dịch",
+    "Dịch",
     "continuation_review",
     "page_policies",
     "garbled",
-    "跨栏",
-    "跨页",
-    "连续段",
-    "页面策略",
-    "块分类",
-    "乱码",
+    "Vượt cột",
+    "Vượt trang",
+    "Đoạn liên tục",
+    "Chiến lược trang",
+    "Phân loại",
+    "Ký tự rác",
   ].some((keyword) => text.includes(keyword))) {
     return USER_STAGE_FLOW.findIndex((stage) => stage.key === "translate");
   }
-  if (["ocr", "parse", "mineru", "paddle", "normaliz", "standard", "document", "标准化"].some((keyword) => text.includes(keyword))) {
+  if (["ocr", "parse", "mineru", "paddle", "normaliz", "standard", "document", "Chuẩn hóa"].some((keyword) => text.includes(keyword))) {
     return USER_STAGE_FLOW.findIndex((stage) => stage.key === "ocr");
   }
   return -1;
@@ -125,8 +125,8 @@ function userStageFor(payload) {
   if (payload.status === "succeeded") {
     return {
       key: "done",
-      label: "完成",
-      detail: "翻译 PDF 已生成",
+      label: "Hoàn thành",
+      detail: "PDF đã dịch đã được tạo",
       step: USER_STAGE_TOTAL,
       total: USER_STAGE_TOTAL,
     };
@@ -134,8 +134,8 @@ function userStageFor(payload) {
   if (payload.status === "failed") {
     return {
       key: "failed",
-      label: "失败",
-      detail: "任务失败，请查看详情",
+      label: "Thất bại",
+      detail: "Tác vụ thất bại, vui lòng xem chi tiết",
       step: null,
       total: USER_STAGE_TOTAL,
     };
@@ -143,17 +143,17 @@ function userStageFor(payload) {
   if (payload.status === "canceled") {
     return {
       key: "canceled",
-      label: "已取消",
-      detail: "任务已取消",
+      label: "Đã hủy",
+      detail: "Tác vụ đã hủy",
       step: null,
       total: USER_STAGE_TOTAL,
     };
   }
-  if (payload.status === "queued" || text.includes("queue") || text.includes("pending") || text.includes("排队")) {
+  if (payload.status === "queued" || text.includes("queue") || text.includes("pending") || text.includes("Xếp hàng")) {
     return {
       key: "queued",
-      label: "排队中",
-      detail: detailForPayload(payload, "等待可用执行槽位"),
+      label: "Đang xếp hàng",
+      detail: detailForPayload(payload, "Đang chờ luồng xử lý khả dụng"),
       step: null,
       total: USER_STAGE_TOTAL,
     };
@@ -171,16 +171,16 @@ function userStageFor(payload) {
   if (payload.status === "running") {
     return {
       key: "running",
-      label: "处理中",
-      detail: detailForPayload(payload, "正在处理任务"),
+      label: "Đang xử lý",
+      detail: detailForPayload(payload, "Đang xử lý tác vụ"),
       step: null,
       total: USER_STAGE_TOTAL,
     };
   }
   return {
     key: "idle",
-    label: "等待中",
-    detail: "等待任务开始",
+    label: "Đang đợi",
+    detail: "Chờ tác vụ bắt đầu",
     step: null,
     total: USER_STAGE_TOTAL,
   };
@@ -189,7 +189,7 @@ function userStageFor(payload) {
 function userStageLabel(payload) {
   const stage = userStageFor(payload);
   if (stage.step && stage.total && payload.status !== "succeeded") {
-    return `第 ${stage.step}/${stage.total} 步 · ${stage.label}`;
+    return `Bước ${stage.step}/${stage.total} · ${stage.label}`;
   }
   return stage.label;
 }
@@ -203,18 +203,18 @@ export function summarizeStageProgressText(payload) {
   const stageKey = stageKeyOf(payload);
   const stage = userStageFor(payload);
   if (stageKey.includes("continuation") || stageKey.includes("page_policies")) {
-    return `第 ${current}/${total} 页`;
+    return `Trang ${current}/${total}`;
   }
   if (stage.key === "translate") {
-    return `第 ${current}/${total} 批`;
+    return `Lô ${current}/${total}`;
   }
   if (stage.key === "ocr") {
-    return `第 ${current}/${total} 页`;
+    return `Trang ${current}/${total}`;
   }
   if (stage.key === "render") {
-    return `第 ${current}/${total} 页`;
+    return `Trang ${current}/${total}`;
   }
-  return `进度 ${current}/${total}`;
+  return `Tiến độ ${current}/${total}`;
 }
 
 export function summarizeStageLabel(payload) {

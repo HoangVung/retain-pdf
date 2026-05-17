@@ -7,15 +7,15 @@ function recentJobsDialogComponent() {
 function recentJobStatusLabel(status) {
   switch (`${status || ""}`.trim()) {
     case "queued":
-      return "排队中";
+      return "Đang xếp hàng";
     case "running":
-      return "进行中";
+      return "Đang tiến hành";
     case "succeeded":
-      return "已完成";
+      return "Đã hoàn thành";
     case "failed":
-      return "失败";
+      return "Thất bại";
     case "canceled":
-      return "已取消";
+      return "Đã hủy";
     default:
       return status || "-";
   }
@@ -112,7 +112,7 @@ export function renderRecentJobsLoading() {
   }
   empty.classList.add("hidden");
   list.classList.remove("hidden");
-  list.innerHTML = '<div class="events-empty">正在加载最近任务…</div>';
+  list.innerHTML = '<div class="events-empty">Đang tải tác vụ gần đây…</div>';
   loadMoreButton.classList.add("hidden");
 }
 
@@ -131,11 +131,11 @@ export function renderRecentJobsEmpty(message, invocationSummary = null) {
   }
   list.innerHTML = "";
   list.classList.add("hidden");
-  empty.textContent = message || "暂无最近任务";
+  empty.textContent = message || "Chưa có tác vụ gần đây";
   empty.classList.remove("hidden");
   loadMoreButton.classList.add("hidden");
   loadMoreButton.disabled = false;
-  loadMoreButton.textContent = "更多";
+  loadMoreButton.textContent = "Thêm";
 }
 
 export function renderRecentJobsError(message, { reset = false } = {}) {
@@ -153,13 +153,13 @@ export function renderRecentJobsError(message, { reset = false } = {}) {
   if (reset) {
     list.innerHTML = "";
     list.classList.add("hidden");
-    empty.textContent = message || "读取最近任务失败";
+    empty.textContent = message || "Đọc tác vụ gần đây thất bại";
     empty.classList.remove("hidden");
   } else {
     loadMoreButton.classList.add("hidden");
   }
   loadMoreButton.disabled = false;
-  loadMoreButton.textContent = "更多";
+  loadMoreButton.textContent = "Thêm";
 }
 
 function buildRecentJobsMarkup(items) {
@@ -173,9 +173,9 @@ function buildRecentJobsMarkup(items) {
         <span class="recent-job-status">${recentJobStatusLabel(item.status)}</span>
       </div>
       <div class="recent-job-meta">
-        <span>类型: ${recentJobKindLabel(item)}</span>
-        <span>阶段: ${item.stage || "-"}</span>
-        <span>更新: ${item.updated_at || "-"}</span>
+        <span>Loại: ${recentJobKindLabel(item)}</span>
+        <span>Giai đoạn: ${item.stage || "-"}</span>
+        <span>Cập nhật: ${item.updated_at || "-"}</span>
         <span class="recent-job-protocol ${recentJobProtocolClass(item)}">${recentJobProtocolLabel(item)}</span>
       </div>
     </button>
@@ -208,7 +208,7 @@ export function renderRecentJobsList({
   list.innerHTML = reset ? markup : `${list.innerHTML}${markup}`;
   loadMoreButton.classList.toggle("hidden", !hasMore);
   loadMoreButton.disabled = false;
-  loadMoreButton.textContent = "更多";
+  loadMoreButton.textContent = "Thêm";
   list.querySelectorAll(".recent-job-item").forEach((button) => {
     button.addEventListener("click", () => {
       onSelect?.(button.dataset.jobId || "");
@@ -227,5 +227,5 @@ export function setRecentJobsLoadMoreLoading() {
     return;
   }
   loadMoreButton.disabled = true;
-  loadMoreButton.textContent = "加载中…";
+  loadMoreButton.textContent = "Đang tải…";
 }

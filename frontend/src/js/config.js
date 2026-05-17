@@ -94,6 +94,10 @@ export function defaultPaddleToken() {
   return typeof runtimeConfig.paddleToken === "string" ? runtimeConfig.paddleToken : "";
 }
 
+export function defaultAiOcrApiKey() {
+  return typeof runtimeConfig.aiOcrApiKey === "string" ? runtimeConfig.aiOcrApiKey : "";
+}
+
 export function defaultOcrProvider() {
   return normalizeOcrProvider(runtimeConfig.ocrProvider);
 }
@@ -162,6 +166,7 @@ function normalizeBrowserStoredConfig(payload = {}) {
     ocrProvider: normalizeOcrProvider(source.ocrProvider),
     mineruToken: typeof source.mineruToken === "string" ? source.mineruToken : "",
     paddleToken: typeof source.paddleToken === "string" ? source.paddleToken : "",
+    aiOcrApiKey: typeof source.aiOcrApiKey === "string" ? source.aiOcrApiKey : "",
     modelApiKey: typeof source.modelApiKey === "string" ? source.modelApiKey : "",
   };
 }
@@ -175,6 +180,7 @@ function currentBrowserStoredConfig() {
     ocrProvider: $("ocr_provider")?.value || DEFAULT_OCR_PROVIDER,
     mineruToken: $("mineru_token")?.value || "",
     paddleToken: $("paddle_token")?.value || "",
+    aiOcrApiKey: $("ai_ocr_api_key")?.value || "",
     modelApiKey: $("api_key")?.value || "",
   });
 }
@@ -185,6 +191,7 @@ function desktopRuntimeToBrowserConfig(runtime = {}) {
     ocrProvider: source.ocrProvider,
     mineruToken: source.mineruToken,
     paddleToken: source.paddleToken,
+    aiOcrApiKey: source.aiOcrApiKey,
     modelApiKey: source.modelApiKey,
   });
 }
@@ -267,6 +274,7 @@ async function saveDesktopPersistedConfig(partial = {}) {
     ocrProvider: merged.browserConfig.ocrProvider,
     mineruToken: merged.browserConfig.mineruToken,
     paddleToken: merged.browserConfig.paddleToken,
+    aiOcrApiKey: merged.browserConfig.aiOcrApiKey,
     modelApiKey: merged.browserConfig.modelApiKey,
     developerConfig: merged.developerConfig,
     runtimeConfig: merged.runtimeConfig,
@@ -380,23 +388,25 @@ export function applyKeyInputs(credentialsOrMineruToken, legacyModelApiKey = "")
   const ocrProvider = normalizeOcrProvider(credentials.ocrProvider);
   const mineruToken = credentials.mineruToken || "";
   const paddleToken = credentials.paddleToken || "";
+  const aiOcrApiKey = credentials.aiOcrApiKey || "";
   const modelApiKey = credentials.modelApiKey || "";
   $("ocr_provider").value = ocrProvider;
   $("mineru_token").value = mineruToken;
   $("paddle_token").value = paddleToken;
+  $("ai_ocr_api_key").value = aiOcrApiKey;
   $("api_key").value = modelApiKey;
 }
 
 export async function desktopInvoke(command, args = {}) {
   if (!desktopBridge) {
-    throw new Error("桌面接口不可用");
+    throw new Error("API Desktop không khả dụng");
   }
   return desktopBridge.invoke(command, args);
 }
 
 export async function openDesktopOutputDirectory() {
   if (!desktopBridge) {
-    throw new Error("桌面接口不可用");
+    throw new Error("API Desktop không khả dụng");
   }
   return desktopBridge.openOutputDirectory();
 }

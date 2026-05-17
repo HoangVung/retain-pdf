@@ -32,6 +32,8 @@ pub struct TranslationInput {
     pub classify_batch_size: i64,
     #[serde(default = "default_rule_profile_name")]
     pub rule_profile_name: String,
+    #[serde(default = "default_target_language_name")]
+    pub target_language_name: String,
     #[serde(default)]
     pub custom_rules_text: String,
     #[serde(default)]
@@ -70,6 +72,7 @@ impl Default for TranslationInput {
             skip_title_translation: false,
             classify_batch_size: default_classify_batch_size(),
             rule_profile_name: default_rule_profile_name(),
+            target_language_name: default_target_language_name(),
             custom_rules_text: String::new(),
             glossary_id: String::new(),
             glossary_name: String::new(),

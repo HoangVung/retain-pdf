@@ -1,4 +1,8 @@
-import { OCR_PROVIDER_DEFINITIONS, TRANSLATION_PROVIDER_DEFINITION } from "../../provider-config.js";
+import {
+  OCR_PROVIDER_DEFINITIONS,
+  TRANSLATION_PROVIDER_DEFINITION,
+  TRANSLATION_PROVIDER_DEFINITIONS,
+} from "../../provider-config.js";
 
 class BrowserCredentialsDialog extends HTMLElement {
   connectedCallback() {
@@ -7,6 +11,9 @@ class BrowserCredentialsDialog extends HTMLElement {
     }
     this.dataset.hydrated = "1";
     const ocrProviderOptions = OCR_PROVIDER_DEFINITIONS.map((provider) => `
+      <option value="${provider.id}">${provider.label}</option>
+    `).join("");
+    const translationProviderOptions = TRANSLATION_PROVIDER_DEFINITIONS.map((provider) => `
       <option value="${provider.id}">${provider.label}</option>
     `).join("");
     const secretToggleIcon = `
@@ -24,7 +31,7 @@ class BrowserCredentialsDialog extends HTMLElement {
         <label>
           <span class="credential-secret-field">
             <input id="browser-${provider.id}-token" type="password" autocomplete="off" placeholder="${provider.tokenPlaceholder}" />
-            <button type="button" class="credential-secret-toggle" data-toggle-secret="browser-${provider.id}-token" aria-label="显示或隐藏 ${provider.tokenLabel}" title="显示或隐藏">${secretToggleIcon}</button>
+            <button type="button" class="credential-secret-toggle" data-toggle-secret="browser-${provider.id}-token" aria-label="Hiện hoặc ẩn ${provider.tokenLabel}" title="Hiện hoặc ẩn">${secretToggleIcon}</button>
           </span>
         </label>
         <div class="credential-card-actions">
@@ -38,26 +45,26 @@ class BrowserCredentialsDialog extends HTMLElement {
         <form method="dialog" class="desktop-shell">
           <div class="desktop-head">
             <div class="credential-dialog-head">
-              <h2 id="browser-credentials-title">接口设置</h2>
+              <h2 id="browser-credentials-title">Cài đặt API</h2>
               <p id="browser-credentials-subtitle" class="muted hidden"></p>
             </div>
-            <button id="browser-credentials-close-btn" type="submit" class="dialog-close-btn" aria-label="关闭">×</button>
+            <button id="browser-credentials-close-btn" type="submit" class="dialog-close-btn" aria-label="Đóng">×</button>
           </div>
           <div class="desktop-body credential-dialog-body">
-            <div id="browser-credentials-tabs" class="developer-tabs credential-tabs" role="tablist" aria-label="接口设置">
-              <button id="browser-credential-tab-api" type="button" class="developer-tab credential-tab is-active" data-credential-tab="api" role="tab" aria-selected="true">API 设置</button>
-              <button id="browser-credential-tab-task" type="button" class="developer-tab credential-tab" data-credential-tab="task" role="tab" aria-selected="false">任务选项</button>
+            <div id="browser-credentials-tabs" class="developer-tabs credential-tabs" role="tablist" aria-label="Cài đặt API">
+              <button id="browser-credential-tab-api" type="button" class="developer-tab credential-tab is-active" data-credential-tab="api" role="tab" aria-selected="true">Cài đặt API</button>
+              <button id="browser-credential-tab-task" type="button" class="developer-tab credential-tab" data-credential-tab="task" role="tab" aria-selected="false">Tùy chọn tác vụ</button>
             </div>
             <div class="credential-card-grid credential-panels">
               <section class="credential-panel is-active" data-credential-panel="api" role="tabpanel">
                 <div class="credential-card-grid credential-card-grid-compact">
                   <section class="credential-card">
                     <div class="credential-card-head">
-                      <h3>OCR 凭证</h3>
+                      <h3>Thông tin OCR</h3>
                     </div>
                     <label>
                       <span class="developer-label">
-                        <span>服务</span>
+                        <span>Dịch vụ</span>
                       </span>
                       <select id="browser-ocr-provider-select" aria-label="OCR Provider">
                         ${ocrProviderOptions}
@@ -75,11 +82,19 @@ class BrowserCredentialsDialog extends HTMLElement {
                     </div>
                     <label>
                       <span class="developer-label">
+                        <span>Dịch vụ dịch</span>
+                      </span>
+                      <select id="browser-translation-provider-select" aria-label="Dịch vụ dịch">
+                        ${translationProviderOptions}
+                      </select>
+                    </label>
+                    <label>
+                      <span class="developer-label">
                         <span>API Key</span>
                       </span>
                       <span class="credential-secret-field">
                         <input id="browser-api-key" type="password" autocomplete="off" placeholder="${TRANSLATION_PROVIDER_DEFINITION.keyPlaceholder}" />
-                        <button type="button" class="credential-secret-toggle" data-toggle-secret="browser-api-key" aria-label="显示或隐藏 DeepSeek API Key" title="显示或隐藏">${secretToggleIcon}</button>
+                        <button type="button" class="credential-secret-toggle" data-toggle-secret="browser-api-key" aria-label="Hiện hoặc ẩn DeepSeek API Key" title="Hiện hoặc ẩn">${secretToggleIcon}</button>
                       </span>
                     </label>
                     <div class="credential-card-actions">
@@ -87,8 +102,8 @@ class BrowserCredentialsDialog extends HTMLElement {
                       <span id="browser-deepseek-validation" class="token-inline-status hidden">${TRANSLATION_PROVIDER_DEFINITION.validationIdleMessage}</span>
                     </div>
                     <div id="browser-deepseek-account-status" class="credential-account-status hidden">
-                      <span class="credential-account-label">账户状态</span>
-                      <strong id="browser-deepseek-account-summary">未检测</strong>
+                      <span class="credential-account-label">Trạng thái tài khoản</span>
+                      <strong id="browser-deepseek-account-summary">Chưa kiểm tra</strong>
                       <span id="browser-deepseek-account-time">-</span>
                     </div>
                   </section>
@@ -97,22 +112,32 @@ class BrowserCredentialsDialog extends HTMLElement {
 
               <section class="credential-card credential-panel" data-credential-panel="task" role="tabpanel" hidden>
                 <div class="credential-card-head">
-                  <h3>任务选项</h3>
+                  <h3>Tùy chọn tác vụ</h3>
                 </div>
                 <label>
                   <span class="developer-label">
-                    <span>公式模式</span>
+                    <span>Chế độ công thức</span>
                   </span>
-                  <select id="browser-job-math-mode" aria-label="公式模式">
-                    <option value="placeholder">占位保护</option>
-                    <option value="direct_typst">直出公式</option>
+                  <select id="browser-job-math-mode" aria-label="Chế độ công thức">
+                    <option value="placeholder">Bảo vệ giữ chỗ</option>
+                    <option value="direct_typst">Xuất công thức trực tiếp</option>
+                  </select>
+                </label>
+                <label>
+                  <span class="developer-label">
+                    <span>Dịch sang</span>
+                  </span>
+                  <select id="browser-job-target-language" aria-label="Dịch sang">
+                    <option value="Tiếng Việt">Tiếng Việt</option>
+                    <option value="English">English</option>
+                    <option value="简体中文">简体中文</option>
                   </select>
                 </label>
               </section>
             </div>
             <div class="actions credential-dialog-actions">
               <span id="browser-credentials-status" class="upload-status hidden"></span>
-              <button id="browser-credentials-save-btn" type="button">保存</button>
+              <button id="browser-credentials-save-btn" type="button">Lưu</button>
             </div>
           </div>
         </form>

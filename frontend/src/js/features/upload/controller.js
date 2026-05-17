@@ -49,17 +49,17 @@ export function mountUploadFeature({
     }
     if (!workflowNeedsUpload()) {
       summary.classList.add("hidden");
-      summary.textContent = "已选择页码：-";
+      summary.textContent = "Trang đã chọn: -";
       return;
     }
     const value = currentPageRanges();
     if (!value) {
       summary.classList.add("hidden");
-      summary.textContent = "已选择页码：-";
+      summary.textContent = "Trang đã chọn: -";
       return;
     }
     summary.classList.remove("hidden");
-    summary.textContent = `已选择页码：${value}`;
+    summary.textContent = `Trang đã chọn: ${value}`;
   }
 
   function openPageRangeDialog() {
@@ -70,17 +70,17 @@ export function mountUploadFeature({
     const titleEl = $("page-range-title");
     if (maxPage > 0) {
       if (limitText) {
-        limitText.textContent = `按页码范围限制本次翻译（最多 ${maxPage} 页，页码从 1 开始）。`;
+        limitText.textContent = `Giới hạn lần dịch này theo phạm vi trang (tối đa ${maxPage} trang, số trang bắt đầu từ 1).`;
       }
       if (titleEl) {
-        titleEl.textContent = `分页翻译（最多 ${maxPage} 页）`;
+        titleEl.textContent = `Dịch theo trang (tối đa ${maxPage} trang)`;
       }
     } else {
       if (limitText) {
-        limitText.textContent = "按页码范围限制本次翻译，页码从 1 开始。";
+        limitText.textContent = "Giới hạn bản dịch theo phạm vi trang, trang bắt đầu từ 1.";
       }
       if (titleEl) {
-        titleEl.textContent = "分页翻译";
+        titleEl.textContent = "Dịch theo trang";
       }
     }
     if (maxPage > 0) {
@@ -106,19 +106,19 @@ export function mountUploadFeature({
     const start = startInput?.value?.trim() || "";
     const end = endInput?.value?.trim() || "";
     if ((start && Number(start) < 1) || (end && Number(end) < 1)) {
-      setText("error-box", "页码必须从 1 开始");
+      setText("error-box", "Số trang phải bắt đầu từ 1");
       return;
     }
     if ((start && frontMaxPageCount && Number(start) > frontMaxPageCount) || (end && frontMaxPageCount && Number(end) > frontMaxPageCount)) {
-      setText("error-box", `页码不能超过 ${frontMaxPageCount}`);
+      setText("error-box", `Số trang không được vượt quá ${frontMaxPageCount}`);
       return;
     }
     if (start && end && Number(start) > Number(end)) {
-      setText("error-box", "起始页不能大于结束页");
+      setText("error-box", "Trang bắt đầu không được lớn hơn trang kết thúc");
       return;
     }
     if (frontMaxPageCount && start && end && Number(end) - Number(start) + 1 > frontMaxPageCount) {
-      setText("error-box", `页码区间不能超过 ${frontMaxPageCount} 页`);
+      setText("error-box", `Phạm vi trang không được vượt quá ${frontMaxPageCount} trang`);
       return;
     }
     if (startInput) {
@@ -161,37 +161,37 @@ export function mountUploadFeature({
       return;
     }
     if (file.size > frontMaxBytes) {
-      setText("error-box", "当前前端限制为 100MB 以内 PDF");
-      setText("upload-status", "文件超出大小限制");
+      setText("error-box", "Frontend hiện tại giới hạn PDF dưới 100MB");
+      setText("upload-status", "Tệp vượt quá giới hạn kích thước");
       $("upload-status")?.classList.remove("hidden");
       return;
     }
     if (frontMaxPageCount && countPdfPages) {
-      setText("upload-status", "正在校验页数…");
+      setText("upload-status", "Đang xác minh số trang…");
       $("upload-status")?.classList.remove("hidden");
       try {
         const localPageCount = await countPdfPages(file);
         if (!Number.isFinite(localPageCount) || localPageCount <= 0) {
-          setText("error-box", "PDF 解析失败，请检查文件是否损坏或可访问性异常。");
-          setText("upload-status", "文件校验失败");
+          setText("error-box", "Phân tích PDF thất bại, vui lòng kiểm tra tệp có bị hỏng hoặc không thể truy cập không.");
+          setText("upload-status", "Kiểm tra tệp thất bại");
           clearFileInputValue();
           return;
         }
         if (localPageCount > frontMaxPageCount) {
-          setText("error-box", `PDF 页数超过限制：最多 ${frontMaxPageCount} 页`);
-          setText("upload-status", "文件超出页数限制");
+          setText("error-box", `PDF vượt quá giới hạn số trang: tối đa ${frontMaxPageCount} trang`);
+          setText("upload-status", "Tệp vượt quá giới hạn số trang");
           clearFileInputValue();
           return;
         }
       } catch (err) {
-        setText("error-box", err?.message || "PDF 解析失败，请稍后重试。");
-        setText("upload-status", "文件校验失败");
+        setText("error-box", err?.message || "Phân tích PDF thất bại, vui lòng thử lại sau.");
+        setText("upload-status", "Kiểm tra tệp thất bại");
         clearFileInputValue();
         return;
       }
     }
     setText("error-box", "-");
-    setText("upload-status", "正在上传…");
+    setText("upload-status", "Đang tải lên…");
     $("upload-status")?.classList.remove("hidden");
 
     try {
@@ -203,8 +203,8 @@ export function mountUploadFeature({
       );
       const uploadedPageCount = Number(payload.page_count || 0);
       if (frontMaxPageCount > 0 && uploadedPageCount > frontMaxPageCount) {
-        setText("error-box", `PDF 页数超过限制：最多 ${frontMaxPageCount} 页`);
-        setText("upload-status", "文件超出页数限制");
+        setText("error-box", `PDF vượt quá giới hạn số trang: tối đa ${frontMaxPageCount} trang`);
+        setText("upload-status", "Tệp vượt quá giới hạn số trang");
         clearFileInputValue();
         resetUploadedFile();
         return;
@@ -215,7 +215,7 @@ export function mountUploadFeature({
       state.uploadedBytes = Number(payload.bytes || file.size || 0);
       $("file")?.closest(".upload-tile")?.classList.toggle("is-ready", !!state.uploadId);
       $("file")?.closest(".upload-tile")?.classList.remove("is-uploading");
-      setText("upload-status", "上传完成，可以开始任务。");
+      setText("upload-status", "Tải lên hoàn tất, có thể bắt đầu tác vụ.");
       $("upload-status")?.classList.remove("hidden");
       clearFileInputValue();
       refreshSubmitControls();
@@ -223,7 +223,7 @@ export function mountUploadFeature({
       resetUploadedFile();
       clearFileInputValue();
       setText("error-box", err.message);
-      setText("upload-status", "上传失败");
+      setText("upload-status", "Tải lên thất bại");
       $("upload-status")?.classList.remove("hidden");
       applyWorkflowMode();
     }

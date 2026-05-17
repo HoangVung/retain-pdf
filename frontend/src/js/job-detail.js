@@ -136,10 +136,10 @@ function resolveLiveDurations(job) {
 function summarizeMathMode(job) {
   const mathMode = `${job?.request_payload_math_mode || ""}`.trim();
   if (mathMode === "placeholder") {
-    return "placeholder - 公式占位保护";
+    return "placeholder - bảo vệ công thức bằng chỗ giữ";
   }
   if (mathMode === "direct_typst") {
-    return "direct_typst - 模型直出公式";
+    return "direct_typst - Mô hìnhXuất công thức trực tiếp";
   }
   return mathMode || "-";
 }
@@ -217,7 +217,7 @@ function renderFailureDebugContext(job) {
     .filter(([, value]) => value);
 
   if (!rows.length) {
-    container.innerHTML = '<div class="detail-empty">暂无结构化失败上下文</div>';
+    container.innerHTML = '<div class="detail-empty">Chưa có ngữ cảnh gỡ lỗi cấu trúc</div>';
     return;
   }
   container.innerHTML = rows.map(([label, value]) => `
@@ -236,15 +236,15 @@ function numberOrNull(value) {
 function summarizeArtifactLabel(key) {
   switch (`${key || ""}`.trim()) {
     case "source_pdf":
-      return "源 PDF";
+      return "PDF nguồn";
     case "translated_pdf":
-      return "译后 PDF";
+      return "PDF sau dịch";
     case "typst_render_pdf":
-      return "Typst 渲染 PDF";
+      return "Typst Kết xuất PDF";
     case "markdown_raw":
       return "Markdown Raw";
     case "markdown_images_dir":
-      return "Markdown 图片目录";
+      return "Thư mục ảnh Markdown";
     case "markdown_bundle_zip":
       return "Markdown Bundle";
     case "normalized_document_json":
@@ -355,7 +355,7 @@ function truncatePreview(value, maxChars = 4000) {
   if (text.length <= maxChars) {
     return text;
   }
-  return `${text.slice(0, maxChars)}\n\n...（预览已截断）`;
+  return `${text.slice(0, maxChars)}\n\n...(bản xem trước đã được rút gọn)`;
 }
 
 function revokeMarkdownImageUrls() {
@@ -376,9 +376,9 @@ function renderArtifactsManifest(manifestPayload) {
     return;
   }
   const items = Array.isArray(manifestPayload?.items) ? [...manifestPayload.items] : [];
-  summary.textContent = items.length > 0 ? `共 ${items.length} 项` : "暂无已登记产物";
+  summary.textContent = items.length > 0 ? `Tổng ${items.length} mục` : "Chưa có kết quả đăng ký";
   if (items.length === 0) {
-    container.innerHTML = '<div class="detail-empty">暂无产物清单</div>';
+    container.innerHTML = '<div class="detail-empty">Chưa có danh sách kết quả</div>';
     return;
   }
   const preferredOrder = [
@@ -475,7 +475,7 @@ function renderMarkdownContract(job, markdownPayload = null) {
   setActionLink("detail-markdown-raw-btn", rawUrl, contract.ready && !!rawUrl);
   if (!contract.ready) {
     revokeMarkdownImageUrls();
-    setText("detail-markdown-status", "当前任务没有已发布 Markdown");
+    setText("detail-markdown-status", "Tác vụ hiện tại chưa có Markdown đã xuất bản");
     setText("detail-markdown-image-count", "0");
     setText("detail-markdown-preview", "-");
     const grid = $("detail-markdown-image-grid");
@@ -487,13 +487,13 @@ function renderMarkdownContract(job, markdownPayload = null) {
     return;
   }
   if (!markdownPayload) {
-    setText("detail-markdown-status", "已发布，正在读取内容…");
+    setText("detail-markdown-status", "Đã xuất bản, đang đọc nội dung…");
     return;
   }
   const refs = collectMarkdownImageRefs(content);
   const fileName = firstNonEmptyText(markdownPayload?.file_name, markdownArtifact.file_name);
   const sizeText = formatSizeBytes(markdownPayload?.size_bytes ?? markdownArtifact.size_bytes);
-  const statusBits = ["已加载 /markdown JSON"];
+  const statusBits = ["Đã tải JSON /markdown"];
   if (fileName) {
     statusBits.push(fileName);
   }
@@ -523,7 +523,7 @@ async function renderMarkdownImagePreview(markdownPayload, imagesBaseUrl) {
   const previews = await Promise.all(previewRefs.map(async (ref) => {
     const absoluteUrl = resolveMarkdownAssetUrl(imagesBaseUrl, ref);
     if (!absoluteUrl) {
-      return { ref, absoluteUrl: "", objectUrl: "", error: "无法解析图片地址" };
+      return { ref, absoluteUrl: "", objectUrl: "", error: "Không thể phân tích địa chỉ ảnh" };
     }
     try {
       const resp = await fetchProtected(absoluteUrl);
@@ -535,7 +535,7 @@ async function renderMarkdownImagePreview(markdownPayload, imagesBaseUrl) {
       detailPageState.markdownImageUrls.push(objectUrl);
       return { ref, absoluteUrl, objectUrl, error: "" };
     } catch (error) {
-      return { ref, absoluteUrl, objectUrl: "", error: error.message || "图片读取失败" };
+      return { ref, absoluteUrl, objectUrl: "", error: error.message || "Đọc ảnh thất bại" };
     }
   }));
   grid.innerHTML = previews.map((item) => `
@@ -543,7 +543,7 @@ async function renderMarkdownImagePreview(markdownPayload, imagesBaseUrl) {
       <div class="detail-artifact-meta mono">${escapeHtml(item.ref)}</div>
       ${item.objectUrl
         ? `<img class="detail-markdown-image" src="${escapeHtml(item.objectUrl)}" alt="${escapeHtml(item.ref)}" />`
-        : `<div class="detail-empty">${escapeHtml(item.error || "图片不可用")}</div>`}
+        : `<div class="detail-empty">${escapeHtml(item.error || "Ảnh không khả dụng")}</div>`}
       <div class="detail-artifact-meta mono">${escapeHtml(item.absoluteUrl || "-")}</div>
     </article>
   `).join("");
@@ -568,7 +568,7 @@ function renderStageHistory(job) {
   list.classList.remove("hidden");
   list.innerHTML = history.map((entry, index) => {
     const enterAt = entry?.enter_at ? formatEventTimestamp(entry.enter_at) : "-";
-    const exitAt = entry?.exit_at ? formatEventTimestamp(entry.exit_at) : (isTerminalStatus(job.status) ? "-" : "进行中");
+    const exitAt = entry?.exit_at ? formatEventTimestamp(entry.exit_at) : (isTerminalStatus(job.status) ? "-" : "Đang tiến hành");
     const terminalText = entry?.terminal_status ? ` · ${entry.terminal_status}` : "";
     return `
       <article class="detail-stage-item">
@@ -590,7 +590,7 @@ function renderEvents(eventsPayload) {
     return;
   }
   const items = Array.isArray(eventsPayload?.items) ? eventsPayload.items : [];
-  status.textContent = items.length > 0 ? `全部事件 · ${items.length} 条` : "全部事件";
+  status.textContent = items.length > 0 ? `Tất cảSự kiện · ${items.length} mục` : "Tất cảSự kiện";
   if (items.length === 0) {
     list.innerHTML = "";
     list.classList.add("hidden");
@@ -713,15 +713,15 @@ function setEventsStatus(text) {
 
 async function ensureEventsLoaded() {
   if (detailPageState.eventsPayload) {
-    setEventsStatus(`全部事件 · ${Array.isArray(detailPageState.eventsPayload.items) ? detailPageState.eventsPayload.items.length : 0} 条`);
+    setEventsStatus(`Tất cảSự kiện · ${Array.isArray(detailPageState.eventsPayload.items) ? detailPageState.eventsPayload.items.length : 0} mục`);
     renderEvents(detailPageState.eventsPayload);
     return detailPageState.eventsPayload;
   }
   if (!detailPageState.job?.job_id) {
-    throw new Error("缺少 job_id，无法加载事件流。");
+    throw new Error("Thiếu job_id, không thể tải luồng sự kiện.");
   }
   if (!detailPageState.eventsLoadingPromise) {
-    setEventsStatus("正在加载全部事件...");
+    setEventsStatus("Đang tải tất cả sự kiện...");
     detailPageState.eventsLoadingPromise = fetchAllJobEvents(detailPageState.job.job_id)
       .then((payload) => {
         detailPageState.eventsPayload = payload;
@@ -729,7 +729,7 @@ async function ensureEventsLoaded() {
         return payload;
       })
       .catch((error) => {
-        setEventsStatus(error.message || "读取事件流失败。");
+        setEventsStatus(error.message || "Đọc luồng sự kiện thất bại.");
         throw error;
       })
       .finally(() => {
@@ -756,14 +756,14 @@ function bindProtectedDownloadLink(id, fallbackNameFactory) {
       const resp = await fetchProtected(url);
       if (!resp.ok) {
         const text = await resp.text();
-        throw new Error(`下载失败: ${resp.status} ${text || "unknown error"}`);
+        throw new Error(`Tải xuống thất bại: ${resp.status} ${text || "unknown error"}`);
       }
       const blob = await resp.blob();
       const disposition = resp.headers.get("content-disposition") || "";
       const fallbackName = fallbackNameFactory(detailPageState.job?.job_id || "job");
       downloadBlob(blob, fileNameFromDisposition(disposition, fallbackName));
     } catch (error) {
-      setText("detail-head-note", error.message || "下载失败");
+      setText("detail-head-note", error.message || "Tải xuống thất bại");
     }
   });
 }
@@ -773,7 +773,7 @@ function bindEventsLauncher() {
     setModalOpen("detail-events-modal", true);
     try {
       await ensureEventsLoaded();
-      $("detail-open-events-btn").textContent = "查看";
+      $("detail-open-events-btn").textContent = "Xem";
     } catch (_error) {
       // Status text already updated in ensureEventsLoaded.
     }
@@ -785,19 +785,19 @@ function bindRerunButton() {
     const button = $("detail-rerun-btn");
     const actionUrl = `${detailPageState.rerunActionUrl || ""}`.trim();
     if (!button || !actionUrl) {
-      setText("detail-rerun-status", "当前任务暂不可从断点恢复。");
+      setText("detail-rerun-status", "Tác vụ hiện tại không thể khôi phục từ điểm dừng.");
       return;
     }
     button.disabled = true;
-    setText("detail-rerun-status", "正在提交恢复任务...");
+    setText("detail-rerun-status", "Đang gửi tác vụ khôi phục...");
     try {
       const payload = await rerunJob(actionUrl);
       const nextJobId = firstJobIdFromPayload(payload);
       if (!nextJobId) {
-        setText("detail-rerun-status", "恢复任务已提交，但响应中没有 job_id。");
+        setText("detail-rerun-status", "Đã gửi tác vụ khôi phục, nhưng không có job_id trong phản hồi.");
         return;
       }
-      setText("detail-rerun-status", `已创建恢复任务 ${nextJobId}，正在跳转...`);
+      setText("detail-rerun-status", `Đã tạo tác vụ khôi phục ${nextJobId}, đang chuyển hướng...`);
       window.location.href = buildFrontendPageUrl("./detail.html", {
         job_id: nextJobId,
       });
@@ -818,13 +818,13 @@ async function initializePage() {
   bindProtectedDownloadLink("detail-markdown-json-btn", (jobId) => `${jobId}-markdown.json`);
   const jobId = getJobIdFromQuery();
   if (!jobId) {
-    setText("detail-head-note", "缺少 job_id，请通过 detail.html?job_id=... 打开。");
+    setText("detail-head-note", "Thiếu job_id, vui lòng mở qua detail.html?job_id=...");
     return;
   }
   setText("detail-job-id", jobId);
   setText("detail-head-note", isMockMode()
-    ? "当前为 mock 明细页，可直接分享当前链接。"
-    : "当前详情页可直接通过 URL 分享给其他人。");
+    ? "Trang chi tiết mô phỏng hiện tại, có thể chia sẻ liên kết trực tiếp."
+    : "Có thể chia sẻ trang chi tiết hiện tại trực tiếp qua URL.");
 
   const [payloadRaw, manifestPayload] = await Promise.all([
     fetchJobPayload(jobId, API_PREFIX),
@@ -878,7 +878,7 @@ async function initializePage() {
   setText("detail-failure-root-cause", summarizeRuntimeField(failure.root_cause || failureDiagnostic.root_cause || failure.upstream_host));
   setText("detail-failure-suggestion", summarizeRuntimeField(failure.suggestion || failureDiagnostic.suggestion || failure.failure_code));
   setText("detail-failure-last-log-line", summarizeRuntimeField(failureLastLogLine));
-  setText("detail-failure-retryable", typeof retryable === "boolean" ? (retryable ? "是" : "否") : "-");
+  setText("detail-failure-retryable", typeof retryable === "boolean" ? (retryable ? "Có" : "Không") : "-");
   renderFailureDebugContext(job);
   const rerunEnabled = actions.rerunEnabled && !!actions.rerun;
   if ($("detail-rerun-btn")) {
@@ -887,11 +887,11 @@ async function initializePage() {
   setText(
     "detail-rerun-status",
     rerunEnabled
-      ? "后端支持从当前任务产物创建恢复任务。"
-      : "当前任务暂不可从断点恢复。",
+      ? "Backend hỗ trợ tạo tác vụ khôi phục từ kết quả tác vụ hiện tại."
+      : "Tác vụ hiện tại không thể khôi phục từ điểm dừng.",
   );
   setText("detail-error-box", summarizePublicError(job));
-  setEventsStatus("尚未加载");
+  setEventsStatus("Chưa tải");
 
   const readerEnabled = Boolean(
     job?.job_id
@@ -914,11 +914,11 @@ async function initializePage() {
         `${markdownPayload.images_base_url || markdownPayload.images_base_path || resolveJobMarkdownContract(job).imagesBaseUrl || ""}`.trim(),
       );
     } else if (resolveJobMarkdownContract(job).ready) {
-      setText("detail-markdown-status", "Markdown 已标记 ready，但 /markdown 暂未返回内容");
+      setText("detail-markdown-status", "Markdown đã sẵn sàng, nhưng /markdown chưa trả về nội dung");
     }
   } catch (error) {
     renderMarkdownContract(job, null);
-    setText("detail-markdown-status", error.message || "读取 Markdown 失败");
+    setText("detail-markdown-status", error.message || "Đọc Markdown thất bại");
   }
 }
 

@@ -9,24 +9,24 @@ class DeveloperSettingsDialog extends HTMLElement {
         <form method="dialog" class="desktop-shell">
           <div class="desktop-head">
             <div class="credential-dialog-head">
-              <h2>开发者设置</h2>
+              <h2>Cài đặt nhà phát triển</h2>
             </div>
-            <button id="developer-close-btn" type="submit" class="dialog-close-btn" aria-label="关闭">×</button>
+            <button id="developer-close-btn" type="submit" class="dialog-close-btn" aria-label="Đóng">×</button>
           </div>
           <div class="desktop-body credential-dialog-body developer-dialog-body">
-            <div class="developer-tabs" role="tablist" aria-label="开发者设置">
+            <div class="developer-tabs" role="tablist" aria-label="Cài đặt nhà phát triển">
               <button id="developer-tab-model" type="button" class="developer-tab is-active" data-developer-tab="model" role="tab" aria-selected="true">
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                   <path d="M4 7.5h16M4 12h10M4 16.5h7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
                 </svg>
-                <span>模型</span>
+                <span>Mô hình</span>
               </button>
               <button id="developer-tab-runtime" type="button" class="developer-tab" data-developer-tab="runtime" role="tab" aria-selected="false">
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                   <path d="M12 3.5v3m0 11v3m8.5-8.5h-3m-11 0h-3M18.01 5.99l-2.12 2.12M8.11 15.89l-2.12 2.12m0-12.02 2.12 2.12m7.78 7.78 2.12 2.12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
                   <circle cx="12" cy="12" r="3.2" stroke="currentColor" stroke-width="1.6"/>
                 </svg>
-                <span>执行</span>
+                <span>Thực thi</span>
               </button>
             </div>
 
@@ -34,25 +34,25 @@ class DeveloperSettingsDialog extends HTMLElement {
               <section id="developer-panel-model" class="developer-panel is-active" data-developer-panel="model" role="tabpanel">
                 <div class="credential-card compact-card">
                   <label>
-                    <span>任务工作流</span>
+                    <span>Quy trình tác vụ</span>
                     <select id="developer-workflow">
-                      <option value="book">book · OCR + 翻译 + 渲染</option>
-                      <option value="translate">translate · OCR + 翻译</option>
-                      <option value="render">render · 复用已有任务产物重新渲染</option>
+                      <option value="book">book · OCR + Dịch + Kết xuất</option>
+                      <option value="translate">translate · OCR + Dịch</option>
+                      <option value="render">render · Dùng lại kết quả tác vụ đã có để kết xuất lại</option>
                     </select>
                   </label>
                   <label id="developer-render-source-wrap" class="hidden">
-                    <span>Render 源任务 ID</span>
-                    <input id="developer-render-source-job-id" type="text" autocomplete="off" placeholder="填写已有 job_id" />
+                    <span>ID tác vụ nguồn để kết xuất</span>
+                    <input id="developer-render-source-job-id" type="text" autocomplete="off" placeholder="Điền job_id đã có" />
                   </label>
-                  <p id="developer-workflow-note" class="muted">\`book\` 会完整执行 OCR、翻译与 PDF 渲染。</p>
+                  <p id="developer-workflow-note" class="muted">\`book\` sẽ chạy đầy đủ OCR, dịch và kết xuất PDF.</p>
                   <label>
-                    <span>模型 Base URL</span>
-                    <input id="developer-base-url" type="text" autocomplete="off" placeholder="例如 https://api.deepseek.com/v1" />
+                    <span>Mô hình Base URL</span>
+                    <input id="developer-base-url" type="text" autocomplete="off" placeholder="Ví dụ https://api.deepseek.com/v1" />
                   </label>
                   <label>
-                    <span>模型名称</span>
-                    <input id="developer-model" type="text" autocomplete="off" placeholder="例如 deepseek-v4-flash" />
+                    <span>Tên mô hình</span>
+                    <input id="developer-model" type="text" autocomplete="off" placeholder="Ví dụ deepseek-v4-flash" />
                   </label>
                 </div>
               </section>
@@ -62,36 +62,36 @@ class DeveloperSettingsDialog extends HTMLElement {
                   <div class="grid two developer-grid">
                     <label>
                       <span class="developer-label">
-                        <span>翻译并发</span>
-                        <button type="button" class="developer-hint" aria-label="翻译并发说明" data-tooltip="同时发送给翻译模型的并发任务数。更高通常更快，但更容易触发限流。">i</button>
+                        <span>Đồng thời dịch</span>
+                        <button type="button" class="developer-hint" aria-label="Giải thích đồng thời dịch" data-tooltip="Số tác vụ gửi đồng thời tới mô hình dịch. Giá trị cao thường nhanh hơn nhưng dễ bị giới hạn tốc độ hơn.">i</button>
                       </span>
                       <input id="developer-workers" type="number" min="1" step="1" inputmode="numeric" />
                     </label>
                     <label>
                       <span class="developer-label">
-                        <span>渲染并发</span>
-                        <button type="button" class="developer-hint" aria-label="渲染并发说明" data-tooltip="最终 PDF 渲染与编译时允许的并发数。">i</button>
+                        <span>Đồng thời kết xuất</span>
+                        <button type="button" class="developer-hint" aria-label="Giải thích đồng thời kết xuất" data-tooltip="Số lượng cho phép khi kết xuất và biên dịch PDF cuối cùng.">i</button>
                       </span>
                       <input id="developer-compile-workers" type="number" min="1" step="1" inputmode="numeric" />
                     </label>
                     <label>
                       <span class="developer-label">
-                        <span>翻译批大小</span>
-                        <button type="button" class="developer-hint" aria-label="翻译批大小说明" data-tooltip="每次提交给翻译模型的文本批次大小。过大可能影响稳定性。">i</button>
+                        <span>Cỡ lô dịch</span>
+                        <button type="button" class="developer-hint" aria-label="Giải thích cỡ lô dịch" data-tooltip="Kích thước lô văn bản gửi tới mô hình dịch mỗi lần. Quá lớn có thể ảnh hưởng độ ổn định.">i</button>
                       </span>
                       <input id="developer-batch-size" type="number" min="1" step="1" inputmode="numeric" />
                     </label>
                     <label>
                       <span class="developer-label">
-                        <span>分类批大小</span>
-                        <button type="button" class="developer-hint" aria-label="分类批大小说明" data-tooltip="论文领域识别与策略分类时使用的批大小。">i</button>
+                        <span>Cỡ lô phân loại</span>
+                        <button type="button" class="developer-hint" aria-label="Giải thích cỡ lô phân loại" data-tooltip="Cỡ lô dùng khi nhận diện lĩnh vực tài liệu và phân loại chiến lược.">i</button>
                       </span>
                       <input id="developer-classify-batch-size" type="number" min="1" step="1" inputmode="numeric" />
                     </label>
                     <label class="developer-span-full">
                       <span class="developer-label">
-                        <span>超时秒数</span>
-                        <button type="button" class="developer-hint" aria-label="超时秒数说明" data-tooltip="单个任务的总超时秒数。超过后任务会被后端终止。">i</button>
+                        <span>Số giây hết hạn</span>
+                        <button type="button" class="developer-hint" aria-label="Giải thích số giây hết hạn" data-tooltip="Tổng thời gian chờ của một tác vụ. Quá thời gian này tác vụ sẽ bị backend dừng.">i</button>
                       </span>
                       <input id="developer-timeout-seconds" type="number" min="1" step="1" inputmode="numeric" />
                     </label>
@@ -100,8 +100,8 @@ class DeveloperSettingsDialog extends HTMLElement {
               </section>
             </div>
             <div class="actions credential-dialog-actions">
-              <button id="developer-reset-btn" type="button" class="secondary">恢复默认</button>
-              <button id="developer-save-btn" type="button">保存</button>
+              <button id="developer-reset-btn" type="button" class="secondary">Khôi phục mặc định</button>
+              <button id="developer-save-btn" type="button">Lưu</button>
             </div>
           </div>
         </form>

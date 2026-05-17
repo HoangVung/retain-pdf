@@ -119,11 +119,11 @@ function errorTypesOf(value) {
 function finalStatusLabel(value) {
   switch (`${value || ""}`.trim()) {
     case "translated":
-      return "已翻译";
+      return "Đã dịch";
     case "kept_origin":
-      return "保留原文";
+      return "Giữ nguyên gốc";
     case "skipped":
-      return "已跳过";
+      return "Đã bỏ qua";
     default:
       return `${value || "-"}`;
   }
@@ -143,8 +143,8 @@ function finalStatusClass(value) {
 }
 
 function summarizeTranslationFilter(query = {}) {
-  const finalStatus = `${query.finalStatus || ""}`.trim() || "全部";
-  const search = `${query.q || ""}`.trim() || "无检索词";
+  const finalStatus = `${query.finalStatus || ""}`.trim() || "Tất cả";
+  const search = `${query.q || ""}`.trim() || "Không có từ khóa tìm kiếm";
   return `final_status=${finalStatus}，q=${search}`;
 }
 
@@ -211,31 +211,31 @@ export function mountStatusDetailFeature({
     dialogComponent()?.setRerunAction?.({
       enabled,
       status: statusText || (enabled
-        ? "后端支持从当前任务产物创建恢复任务。"
-        : "当前任务暂不可从断点恢复。"),
+        ? "Backend hỗ trợ tạo tác vụ khôi phục từ kết quả tác vụ hiện tại."
+        : "Tác vụ hiện tại không thể khôi phục từ điểm dừng."),
     });
     return actions.rerun || "";
   }
 
   async function rerunCurrentJob() {
-    const actionUrl = syncRerunAction("正在提交恢复任务...");
+    const actionUrl = syncRerunAction("Đang gửi tác vụ khôi phục...");
     const button = $("failure-rerun-btn");
     if (button) {
       button.disabled = true;
     }
     if (!actionUrl) {
-      syncRerunAction("当前任务暂不可从断点恢复。");
+      syncRerunAction("Tác vụ hiện tại không thể khôi phục từ điểm dừng.");
       return;
     }
     try {
       const payload = await rerunJob(actionUrl);
       const nextJobId = firstJobIdFromPayload(payload);
       if (!nextJobId) {
-        syncRerunAction("恢复任务已提交，但响应中没有 job_id。");
+        syncRerunAction("Đã gửi tác vụ khôi phục, nhưng không có job_id trong phản hồi.");
         return;
       }
       dialogComponent()?.close?.();
-      setText?.("error-box", `已创建恢复任务 ${nextJobId}，开始轮询。`);
+      setText?.("error-box", `Đã tạo tác vụ khôi phục ${nextJobId}, bắt đầu thăm dò.`);
       startPolling?.(nextJobId);
     } catch (error) {
       syncRerunAction(error.message || String(error));
@@ -307,7 +307,7 @@ export function mountStatusDetailFeature({
     component?.renderTranslationItemDetail({
       loading: false,
       hasItem: false,
-      emptyText: "请选择左侧 item",
+      emptyText: "Vui lòng chọn item bên trái",
       meta: "-",
       replayEnabled: false,
     });
@@ -323,13 +323,13 @@ export function mountStatusDetailFeature({
       counts: summary.counts || {},
       finalStatusCounts: summary.final_status_counts || {},
       providerFamily: `${summary.provider_family || ""}`.trim(),
-      summaryScopeText: "当前 job 全量统计",
+      summaryScopeText: "Thống kê toàn bộ tác vụ hiện tại",
       filterText: summarizeTranslationFilter(translationState.query),
       hidden: false,
     });
   }
 
-  function renderTranslationItems({ loading = false, emptyText = "没有匹配的翻译 item" } = {}) {
+  function renderTranslationItems({ loading = false, emptyText = "Không có item dịch thuật phù hợp" } = {}) {
     const component = dialogComponent();
     const list = translationState.list || [];
     const offset = Number(translationState.query.offset || 0);
@@ -340,13 +340,13 @@ export function mountStatusDetailFeature({
     const totalPages = total > 0 ? Math.ceil(total / Math.max(limit, 1)) : 0;
     const currentPage = total > 0 ? Math.floor(offset / Math.max(limit, 1)) + 1 : 0;
     const meta = loading
-      ? "读取中..."
-      : `共 ${total} 条，本页 ${list.length} 条，offset ${offset}，limit ${limit}`;
+      ? "Đang đọc..."
+      : `Tổng ${total} mục, trang này ${list.length} mục, offset ${offset}, limit ${limit}`;
     const pageLabel = loading
-      ? "读取中..."
+      ? "Đang đọc..."
       : total > 0
-        ? `第 ${currentPage} / ${totalPages} 页`
-        : "第 0 / 0 页";
+        ? `Trang ${currentPage} / ${totalPages}`
+        : "Trang 0 / 0";
     const markup = list.map((item) => {
       const active = item.item_id === translationState.selectedItemId;
       const routePath = normalizeRoutePath(routePathOf(item));
@@ -365,7 +365,7 @@ export function mountStatusDetailFeature({
             <span class="translation-item-status ${finalStatusClass(finalStatus)}">${escapeHtml(finalStatusLabel(finalStatus))}</span>
           </div>
           <div class="translation-item-card-meta">
-            <span class="translation-item-chip">第 ${escapeHtml(pageNumberOf(item))} 页</span>
+            <span class="translation-item-chip">Trang ${escapeHtml(pageNumberOf(item))}</span>
             <span class="translation-item-chip">${escapeHtml(item.block_type || "-")}</span>
             <span class="translation-item-chip">${escapeHtml(item.classification_label || "-")}</span>
           </div>
@@ -411,7 +411,7 @@ export function mountStatusDetailFeature({
     `;
   }
 
-  function renderTranslationItemDetail({ loading = false, emptyText = "请选择左侧 item" } = {}) {
+  function renderTranslationItemDetail({ loading = false, emptyText = "Vui lòng chọn item bên trái" } = {}) {
     const component = dialogComponent();
     const payload = translationState.selectedItem;
     if (loading) {
@@ -419,7 +419,7 @@ export function mountStatusDetailFeature({
         loading: true,
         hasItem: false,
         emptyText,
-        meta: "读取中...",
+        meta: "Đang đọc...",
         replayEnabled: false,
       });
       return;
@@ -453,16 +453,16 @@ export function mountStatusDetailFeature({
         ${renderField("fallback_to", fallbackToOf(item) || "-")}
         ${renderField("degradation_reason", degradationReasonOf(item) || "-")}
       </div>
-      ${renderTextBlock("原文", item.source_text || "")}
-      ${renderTextBlock("落盘翻译", item.translated_text || item.translation_unit_translated_text || item.group_translated_text || "")}
-      ${renderTextBlock("保护后译文", item.protected_translated_text || item.translation_unit_protected_translated_text || item.group_protected_translated_text || "")}
+      ${renderTextBlock("Bản gốc", item.source_text || "")}
+      ${renderTextBlock("Bản dịch đã lưu", item.translated_text || item.translation_unit_translated_text || item.group_translated_text || "")}
+      ${renderTextBlock("Bản dịch sau bảo vệ", item.protected_translated_text || item.translation_unit_protected_translated_text || item.group_protected_translated_text || "")}
       ${renderTextBlock("translation_diagnostics", diagnostics || {})}
     `;
     component?.renderTranslationItemDetail({
       loading: false,
       hasItem: true,
       markup,
-      meta: `${payload.item_id || item.item_id || "-"} · 第 ${pageNumber} 页`,
+      meta: `${payload.item_id || item.item_id || "-"} · Trang ${pageNumber}`,
       replayEnabled: true,
     });
   }
@@ -488,7 +488,7 @@ export function mountStatusDetailFeature({
     dialogComponent()?.renderTranslationReplay({
       hasResult: true,
       markup,
-      status: payload.replay_error ? "重放返回错误" : "重放完成",
+      status: payload.replay_error ? "Phát lại trả về lỗi" : "Phát lại hoàn thành",
     });
   }
 
@@ -501,7 +501,7 @@ export function mountStatusDetailFeature({
     const jobId = getCurrentJobId();
     if (!jobId) {
       resetTranslationState("");
-      renderTranslationEmpty("请先选择任务");
+      renderTranslationEmpty("Vui lòng chọn tác vụ trước");
       return;
     }
     await loadTranslationSummary(jobId);
@@ -525,7 +525,7 @@ export function mountStatusDetailFeature({
     translationState.selectedItem = null;
     translationState.replay = null;
     renderTranslationItemDetail({
-      emptyText: nextItemId ? "请选择左侧 item" : "没有可查看的 item",
+      emptyText: nextItemId ? "Vui lòng chọn item bên trái" : "Không có item để xem",
     });
     renderTranslationReplay();
     if (nextItemId) {
@@ -554,7 +554,7 @@ export function mountStatusDetailFeature({
     }
     dialogComponent()?.renderTranslationReplay({
       hasResult: false,
-      status: "重放中...",
+      status: "Đang phát lại...",
     });
     translationState.replay = await replayTranslationItem(jobId, itemId, apiPrefix);
     renderTranslationReplay();
@@ -564,7 +564,7 @@ export function mountStatusDetailFeature({
     const jobId = getCurrentJobId();
     if (!jobId) {
       resetTranslationState("");
-      renderTranslationEmpty("请先选择任务");
+      renderTranslationEmpty("Vui lòng chọn tác vụ trước");
       return;
     }
     if (translationState.jobId !== jobId) {
@@ -577,7 +577,7 @@ export function mountStatusDetailFeature({
       renderTranslationReplay();
       return;
     }
-    renderTranslationEmpty("正在读取翻译调试数据...");
+    renderTranslationEmpty("Đang đọc dữ liệu gỡ lỗi dịch thuật...");
     try {
       await reloadTranslationSummaryAndItems({ selectFirst: true });
       translationState.loaded = true;
@@ -661,7 +661,7 @@ export function mountStatusDetailFeature({
       void replayCurrentItem().catch((error) => {
         dialogComponent()?.renderTranslationReplay({
           hasResult: true,
-          status: "重放失败",
+          status: "Phát lại thất bại",
           markup: renderTextBlock("replay_error", {
             message: error.message || String(error),
           }),

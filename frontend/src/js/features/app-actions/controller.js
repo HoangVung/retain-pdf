@@ -37,7 +37,7 @@ export function mountAppActionsFeature({
     state.uploadedPageCount = 0;
     state.uploadedBytes = 0;
     resetUploadedFile?.();
-    setText("error-box", "当前上传文件已失效，请重新上传 PDF 后再提交。");
+    setText("error-box", "Tệp tải lên hiện tại không hợp lệ, vui lòng tải lại PDF rồi gửi.");
   }
 
   async function submitForm(event) {
@@ -61,26 +61,34 @@ export function mountAppActionsFeature({
     }
     if (state.desktopMode && !state.desktopConfigured && workflowNeedsCredentials(workflow)) {
       openSetupDialog();
-      setText("error-box", "请先完成首次配置。");
+      setText("error-box", "Vui lòng hoàn tất cấu hình ban đầu.");
       return;
     }
     if (workflowNeedsUpload(workflow) && !state.uploadId) {
-      setText("error-box", "请先选择并上传 PDF 文件");
+      setText("error-box", "Vui lòng chọn và tải lên tệp PDF trước");
+      return;
+    }
+    const ocrProvider = `${$("ocr_provider")?.value || ""}`.trim().toLowerCase();
+    if (["google", "openai"].includes(ocrProvider)) {
+      setText(
+        "error-box",
+        `${ocrProvider === "google" ? "Google OCR" : "OpenAI OCR"} mới có phần cấu hình, backend chưa hỗ trợ chạy OCR provider này. Vui lòng dùng MinerU hoặc PaddleOCR.`,
+      );
       return;
     }
     if (!workflowNeedsUpload(workflow) && !currentRenderSourceJobId()) {
-      setText("error-box", "请先在开发者设置里填写 Render 源任务 ID。");
+      setText("error-box", "Vui lòng điền ID tác vụ nguồn để kết xuất trong Cài đặt nhà phát triển.");
       return;
     }
     if (workflowNeedsCredentials(workflow) && !(await getBrowserCredentialsFeature()?.ensureOcrCredentialsReady({
       onMissingToken: () => {
-        setText("error-box", "请先填写当前 OCR Provider 凭证。");
+        setText("error-box", "Vui lòng điền thông tin OCR Provider hiện tại.");
         if (!state.desktopMode) {
           getBrowserCredentialsFeature()?.openBrowserCredentialsDialog();
         }
       },
       onInvalidToken: (result) => {
-        setText("error-box", result.summary || "OCR Provider 凭证校验未通过。");
+        setText("error-box", result.summary || "Thông tin OCR Provider chưa vượt qua kiểm tra.");
         if (!state.desktopMode) {
           getBrowserCredentialsFeature()?.openBrowserCredentialsDialog();
         }
@@ -118,7 +126,7 @@ export function mountAppActionsFeature({
       }
       return true;
     } catch (_err) {
-      const message = `当前前端无法连接后端。API Base: ${apiBase()}。请确认本地服务已经启动，然后重试。`;
+      const message = `Frontend hiện không thể kết nối backend. API Base: ${apiBase()}。Vui lòng xác nhận dịch vụ cục bộ đã khởi động rồi thử lại.`;
       setText("error-box", message);
       throw new Error(message);
     }

@@ -5,6 +5,7 @@ import {
   defaultMineruToken,
   defaultOcrProvider,
   defaultPaddleToken,
+  defaultAiOcrApiKey,
   defaultModelApiKey,
   defaultModelBaseUrl,
   defaultModelName,
@@ -22,6 +23,7 @@ import {
   DEFAULT_COMPILE_WORKERS,
   DEFAULT_FILE_LABEL,
   DEFAULT_LANGUAGE,
+  DEFAULT_TARGET_LANGUAGE_NAME,
   DEFAULT_MODE,
   DEFAULT_MODEL_VERSION,
   DEFAULT_RULE_PROFILE,
@@ -279,6 +281,7 @@ async function initializePage() {
       ocrProvider: browserStored.ocrProvider || defaultOcrProvider(),
       mineruToken: browserStored.mineruToken || defaultMineruToken(),
       paddleToken: browserStored.paddleToken || defaultPaddleToken(),
+      aiOcrApiKey: browserStored.aiOcrApiKey || defaultAiOcrApiKey(),
       modelApiKey: browserStored.modelApiKey || defaultModelApiKey(),
     },
   );
@@ -304,6 +307,7 @@ async function initializePage() {
     defaultModelBaseUrl,
     defaultMineruToken,
     defaultPaddleToken,
+    defaultAiOcrApiKey,
     defaultOcrProvider,
     defaultModelApiKey,
     normalizeWorkflow,
@@ -316,6 +320,7 @@ async function initializePage() {
       DEFAULT_TIMEOUT_SECONDS,
       DEFAULT_MODEL_VERSION,
       DEFAULT_LANGUAGE,
+      DEFAULT_TARGET_LANGUAGE_NAME,
       DEFAULT_MODE,
       DEFAULT_RULE_PROFILE,
       DEFAULT_RENDER_MODE,
@@ -357,13 +362,18 @@ async function initializePage() {
     applyKeyInputs,
     defaultMineruToken,
     defaultPaddleToken,
+    defaultAiOcrApiKey,
     defaultModelApiKey,
     defaultModelBaseUrl,
     getTaskOptions: () => workflowFeature?.developerConfigWithDefaults() || {},
-    saveTaskOptions: ({ mathMode, translateTitles }) => {
+    saveTaskOptions: ({ translationProvider, model, baseUrl, mathMode, targetLanguageName, translateTitles }) => {
       state.developerConfig = {
         ...(state.developerConfig || {}),
+        translationProvider: `${translationProvider || state.developerConfig?.translationProvider || "deepseek"}`.trim(),
+        model: `${model || state.developerConfig?.model || defaultModelName()}`.trim(),
+        baseUrl: `${baseUrl || state.developerConfig?.baseUrl || defaultModelBaseUrl()}`.trim(),
         mathMode: normalizeMathMode(mathMode),
+        targetLanguageName: `${targetLanguageName || DEFAULT_TARGET_LANGUAGE_NAME}`.trim() || DEFAULT_TARGET_LANGUAGE_NAME,
         translateTitles: translateTitles !== false,
       };
       void savePersistedDeveloperStoredConfig(state.developerConfig);
@@ -460,6 +470,7 @@ async function initializePage() {
   $("ocr_provider")?.addEventListener("input", saveBrowserStoredConfig);
   $("mineru_token")?.addEventListener("input", saveBrowserStoredConfig);
   $("paddle_token")?.addEventListener("input", saveBrowserStoredConfig);
+  $("ai_ocr_api_key")?.addEventListener("input", saveBrowserStoredConfig);
   $("api_key")?.addEventListener("input", saveBrowserStoredConfig);
   $("job-form")?.addEventListener("submit", submitForm);
   $("page-range-btn")?.addEventListener("click", () => uploadFeature?.openPageRangeDialog());

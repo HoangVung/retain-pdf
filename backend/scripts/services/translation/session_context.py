@@ -14,8 +14,8 @@ def build_translation_context(
     *,
     mode: str = "fast",
     source_lang: str = "auto",
-    target_lang: str = "zh-CN",
-    target_language_name: str = "简体中文",
+    target_lang: str = "vi",
+    target_language_name: str = "Tiếng Việt",
     domain_guidance: str = "",
     rule_guidance: str = "",
     extra_guidance: str = "",
@@ -52,6 +52,7 @@ def build_translation_context_from_policy(
     retrieval_entries: list[RetrievalEvidence] | None = None,
     model: str = "",
     base_url: str = "",
+    target_language_name: str = "Tiếng Việt",
 ) -> TranslationControlContext:
     extra_guidance_parts: list[str] = []
     if extra_guidance.strip():
@@ -65,6 +66,7 @@ def build_translation_context_from_policy(
         )
     return build_translation_context(
         mode=policy_config.mode,
+        target_language_name=target_language_name,
         domain_guidance=(policy_config.domain_context.get("translation_guidance") or "").strip(),
         rule_guidance=policy_config.rule_guidance,
         extra_guidance="\n\n".join(extra_guidance_parts).strip(),
