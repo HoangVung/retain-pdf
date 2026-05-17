@@ -274,17 +274,21 @@ export function mountWorkflowFeature({
       : definition.id === "mineru"
         ? ($("mineru_token")?.value || defaultMineruToken())
         : ($("ai_ocr_api_key")?.value || defaultAiOcrApiKey());
-    return {
+    const isAiOcr = definition.id === "google" || definition.id === "openai";
+    const payload = {
       provider,
       [definition.tokenField]: token,
-      ai_ocr_model: definition.id === "google" ? "gemini-2.5-flash" : "gpt-4.1-mini",
-      ai_ocr_base_url: definition.id === "google"
-        ? "https://generativelanguage.googleapis.com/v1beta/openai"
-        : "https://api.openai.com/v1",
       model_version: DEFAULT_MODEL_VERSION,
       language: DEFAULT_LANGUAGE,
       page_ranges: pageRanges,
     };
+    if (isAiOcr) {
+      payload.ai_ocr_model = definition.id === "google" ? "gemini-2.5-flash" : "gpt-4.1-mini";
+      payload.ai_ocr_base_url = definition.id === "google"
+        ? "https://generativelanguage.googleapis.com/v1beta/openai"
+        : "https://api.openai.com/v1";
+    }
+    return payload;
   }
 
   function buildTranslationPayload(developerConfig) {
