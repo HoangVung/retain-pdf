@@ -306,7 +306,14 @@ async function createSplashWindow() {
       sandbox: false,
     },
   });
-  await splashWindow.loadFile(path.join(__dirname, "splash.html"));
+  const splashFilePath = path.join(__dirname, "splash.html");
+  try {
+    await splashWindow.loadFile(splashFilePath);
+  } catch (loadError) {
+    logDesktopError(`[desktop] splash loadFile failed: ${loadError?.message || loadError}, retrying...`);
+    await new Promise((r) => setTimeout(r, 500));
+    await splashWindow.loadFile(splashFilePath);
+  }
   updateSplashProgress(6, "Đang chuẩn bị môi trường chạy", "Đang kiểm tra thành phần desktop và tài nguyên cục bộ");
 }
 
@@ -962,6 +969,10 @@ function resolveFrontendRoot() {
   }
   return generatedFrontendRoot;
 }
+
+app.commandLine.appendSwitch("disable-gpu-disk-cache");
+app.commandLine.appendSwitch("disable-gpu");
+app.commandLine.appendSwitch("disable-software-rasterizer");
 
 app.whenReady().then(() => {
   desktopLogPath = resolveDesktopLogPath();
