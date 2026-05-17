@@ -1,3 +1,5 @@
 node_modules/
 app/
 win/
+dist/
+src/runtime/windows/
