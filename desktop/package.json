@@ -86,8 +86,8 @@
       "installerIcon": "build/icon.ico",
       "uninstallerIcon": "build/icon.ico",
       "installerHeaderIcon": "build/icon.ico",
-      "script": "installer/RetainPDF-installer.nsi",
-      "shortcutName": "RetainPDF"
+      "shortcutName": "RetainPDF",
+      "language": 1066
     }
   }
 }
